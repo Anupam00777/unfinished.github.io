@@ -447,7 +447,7 @@ window.addEventListener("keyup", function (event) {
 });
 
 document.addEventListener("click", function () {
-  // document.documentElement.requestFullscreen();
+  document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
