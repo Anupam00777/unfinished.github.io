@@ -507,8 +507,8 @@ leftpanhammer.add(
 );
 
 rightpanhammer.on("pan", function (event) {
-  Pointer.x -= event.velocityX;
-  Pointer.y += event.velocityY;
+  Pointer.x -= event.velocityX / 4;
+  Pointer.y += event.velocityY / 4;
   if (Pointer.y > 2) {
     Pointer.y = 2;
   } else if (Pointer.y < 1) {
