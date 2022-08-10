@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PANDA3D</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      .flex {
+        display: flex;
+      }
+      .grid {
+        display: grid;
+      }
+      .wrapper {
+        z-index: 2;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        align-items: center;
+        justify-content: center;
+      }
+      .container {
+        max-width: 80vw;
+        min-width: 100vh;
+        height: 80vh;
+        border: 1px solid rgb(0, 0, 0);
+        background: url("https://wallpaperaccess.com/full/1940049.jpg") fixed
+          no-repeat;
+        background-size: cover;
+      }
+      .logo {
+        width: 90%;
+        height: 40%;
+        margin: 20px auto;
+        background: url("assets/LOGO.jpg") fixed no-repeat;
+        background-size: contain;
+      }
+      .menu {
+        width: 90%;
+        justify-items: center;
+        height: 50%;
+        margin: 10px auto;
+      }
+      .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 90%;
+        width: 90%;
+        grid-row: 1;
+        margin: auto 1px;
+        align-self: center;
+      }
+      .play {
+        width: 35vh;
+        height: 15vh;
+        transition: all 1s ease;
+      }
+      .play:hover {
+        width: 45vh;
+        height: 20vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper flex">
+      <div class="container">
+        <div class="logo"></div>
+        <div class="menu grid">
+          <!-- <div class="btn tp"></div> -->
+          <div class="btn">
+            <img class="play" src="assets/playLOGO.png" alt="play" />
+          </div>
+          <!-- <div class="btn fp"></div> -->
+        </div>
+      </div>
+    </div>
+    <script type="module" src="three.min.js"></script>
+    <script src="https://hammerjs.github.io/dist/hammer.js"></script>
+    <script type="module" src="index.js"></script>
+  </body>
+</html>
