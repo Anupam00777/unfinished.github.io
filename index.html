@@ -66,9 +66,23 @@
         width: 45vh;
         height: 20vh;
       }
+      .controlArea {
+        z-index: 1;
+        position: absolute;
+        width: 50vw;
+        height: 100vh;
+      }
+      #leftcontrols {
+        left: 0;
+      }
+      #rightcontrols {
+        right: 0;
+      }
     </style>
   </head>
   <body>
+    <div id="leftcontrols" class="controlArea flex"></div>
+    <div id="rightcontrols" class="controlArea flex"></div>
     <div class="wrapper flex">
       <div class="container">
         <div class="logo"></div>

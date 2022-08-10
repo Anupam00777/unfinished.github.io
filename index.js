@@ -480,13 +480,57 @@ window.onresize = () => {
   renderer.setPixelRatio(devicePixelRatio);
 };
 //////////////////////////////////////////////////////
+const leftTouchArea = document.getElementById("leftcontrols");
+const rightTouchArea = document.getElementById("rightcontrols");
+const rightpanhammer = new Hammer.Manager(rightTouchArea);
+const leftpanhammer = new Hammer.Manager(leftTouchArea);
+rightpanhammer.add(
+  new Hammer.Pan({
+    direction: Hammer.DIRECTION_ALL,
+    threshold: 0,
+    pointers: 0,
+  })
+);
+rightpanhammer.add(
+  new Hammer.Tap({
+    event: "doubletap",
+    taps: 2,
+  })
+);
+leftpanhammer.add(
+  new Hammer.Pan({
+    direction: Hammer.DIRECTION_ALL,
+    threshold: 0,
+    pointers: 0,
+  }).recognizeWith([rightpanhammer.get("pan"), rightpanhammer.get("doubletap")])
+);
 
-const hammer = new Hammer(document);
-hammer.get("pan").set({ direction: Hammer.DIRECTION_ALL });
-hammer.on("pan", function (event) {
-  console.log(event);
+rightpanhammer.on("pan", function (event) {
+  Pointer.x -= event.deltaX / 600;
+  Pointer.y += event.deltaY / 800;
 });
-
+rightpanhammer.on("doubletap", function () {
+  boxbody.applyImpulse(new cannon.Vec3(0, 5, 0), new cannon.Vec3(0, 2, 0));
+});
+leftpanhammer.on("panend", function () {
+  move[0] = false;
+  move[1] = false;
+  move[2] = false;
+  move[3] = false;
+});
+leftpanhammer.on("panup", function (event) {
+  deltaTime = event.deltaTime;
+  move[0] = true;
+});
+leftpanhammer.on("panright", function () {
+  move[3] = true;
+});
+leftpanhammer.on("panleft", function () {
+  move[2] = true;
+});
+leftpanhammer.on("pandown", function () {
+  move[1] = true;
+});
 //////////////////////////////////////////////////////
 const tpcam = () => {
   camera.position.set(
