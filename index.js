@@ -6,7 +6,7 @@ import { Camera } from "./three.module.js";
 
 //////////////////////////////////////////////////////
 let play = false;
-let Perspective = "fp";
+let Perspective = "tp";
 let ob3d = [];
 let bd3d = [];
 let mob3d = [];
@@ -447,7 +447,7 @@ window.addEventListener("keyup", function (event) {
 });
 
 document.addEventListener("click", function () {
-  document.body.requestFullscreen();
+  // document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
@@ -509,28 +509,40 @@ leftpanhammer.add(
 rightpanhammer.on("pan", function (event) {
   Pointer.x -= event.velocityX;
   Pointer.y += event.velocityY;
+  if (Pointer.y > 2) {
+    Pointer.y = 2;
+  } else if (Pointer.y < 1) {
+    Pointer.y = 1;
+  }
 });
 rightpanhammer.on("doubletap", function () {
-  boxbody.applyImpulse(new cannon.Vec3(0, 5, 0), new cannon.Vec3(0, 2, 0));
+  boxbody.applyImpulse(new cannon.Vec3(0, 70, 0), new cannon.Vec3(0, 2, 0));
 });
-leftpanhammer.on("panend", function () {
+const nullify = () => {
   move[0] = false;
   move[1] = false;
   move[2] = false;
   move[3] = false;
+};
+leftpanhammer.on("panstart panend", function () {
+  nullify();
 });
-leftpanhammer.on("panup", function (event) {
-  deltaTime = event.deltaTime * 0.01;
-  move[0] = true;
-});
-leftpanhammer.on("panright", function () {
-  move[3] = true;
-});
-leftpanhammer.on("panleft", function () {
-  move[2] = true;
-});
-leftpanhammer.on("pandown", function () {
-  move[1] = true;
+leftpanhammer.on("panmove", function (event) {
+  switch (Math.round(event.angle * 0.01 + 0.1)) {
+    case -1:
+      deltaTime = event.deltaTime * 0.01;
+      move[0] = true;
+      break;
+    case 1:
+      move[1] = true;
+      break;
+    case 2:
+      move[2] = true;
+      break;
+    case 0:
+      move[3] = true;
+      break;
+  }
 });
 //////////////////////////////////////////////////////
 const tpcam = () => {
