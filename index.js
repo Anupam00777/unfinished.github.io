@@ -366,7 +366,7 @@ window.addEventListener("keydown", function (event) {
     now.start();
   }
   deltaTime = now.getElapsedTime();
-  console.log(event.key);
+  // console.log(event.key);
   switch (event.key) {
     case "w":
       move[0] = true;
@@ -447,6 +447,7 @@ window.addEventListener("keyup", function (event) {
 });
 
 document.addEventListener("click", function () {
+  document.body.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
@@ -506,8 +507,8 @@ leftpanhammer.add(
 );
 
 rightpanhammer.on("pan", function (event) {
-  Pointer.x -= event.deltaX / 600;
-  Pointer.y += event.deltaY / 800;
+  Pointer.x -= event.velocityX;
+  Pointer.y += event.velocityY;
 });
 rightpanhammer.on("doubletap", function () {
   boxbody.applyImpulse(new cannon.Vec3(0, 5, 0), new cannon.Vec3(0, 2, 0));
@@ -519,7 +520,7 @@ leftpanhammer.on("panend", function () {
   move[3] = false;
 });
 leftpanhammer.on("panup", function (event) {
-  deltaTime = event.deltaTime;
+  deltaTime = event.deltaTime * 0.01;
   move[0] = true;
 });
 leftpanhammer.on("panright", function () {
