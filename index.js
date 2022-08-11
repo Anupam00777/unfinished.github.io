@@ -11,7 +11,7 @@ let actions;
 let skeleton, mixer, clock;
 let idleAction, walkAction, runAction;
 let play = false;
-let Perspective = "tp";
+let Perspective = "fp";
 let ob3d = [];
 let bd3d = [];
 let mob3d = [];
@@ -329,7 +329,7 @@ const cm1 = new cannon.Material();
 const cm2 = new cannon.Material();
 const c12 = new cannon.ContactMaterial(cm1, cm2, {
   friction: 0.9,
-  restitution: 0.3,
+  restitution: 0,
 });
 
 const groundbody = new cannon.Body({
@@ -338,12 +338,12 @@ const groundbody = new cannon.Body({
   material: cm1,
 });
 const playerBody = new cannon.Body({
-  shape: new cannon.Sphere(0.2),
+  shape: new cannon.Sphere(0.8),
   position: new cannon.Vec3(0, 5, 0),
   mass: 5,
   material: cm2,
   linearDamping: 0.6,
-  angularDamping: 0.6,
+  angularDamping: 1,
 });
 // const box = new cannon.Body({
 //   shape: new cannon.Box(new cannon.Vec3(100, 0.25, 100)),
@@ -385,6 +385,7 @@ let move = [
 ];
 let now = new THREE.Clock();
 let deltaTime;
+let moving = false;
 function playerMovement() {
   if (move[0]) {
     playerBody.angularVelocity.set(
@@ -393,7 +394,11 @@ function playerMovement() {
       -MoveDir.x * 20 * (1 + deltaTime * 0.1)
     );
     playerBody.applyForce(
-      new cannon.Vec3(MoveDir.x * 12, 0, MoveDir.z * 12),
+      new cannon.Vec3(
+        MoveDir.x * 12 * (1 + deltaTime * 0.1),
+        0,
+        MoveDir.z * 12 * (1 + deltaTime * 0.1)
+      ),
       new cannon.Vec3(1, 0, 1)
     );
   }
@@ -463,7 +468,10 @@ window.addEventListener("keydown", function (event) {
   }
   deltaTime = now.getElapsedTime();
   // console.log(event.key);
-  PlayerLoad.prepareCrossFade(idleAction, walkAction, 1);
+  if (!moving) {
+    PlayerLoad.prepareCrossFade(idleAction, runAction, 1);
+    moving = true;
+  }
   switch (event.key) {
     case "w":
       move[0] = true;
@@ -505,7 +513,10 @@ window.addEventListener("keydown", function (event) {
 });
 window.addEventListener("keyup", function (event) {
   now.stop();
-  PlayerLoad.prepareCrossFade(walkAction, idleAction, 0.5);
+  if (moving) {
+    PlayerLoad.prepareCrossFade(runAction, idleAction, 0.5);
+    moving = false;
+  }
   switch (event.key) {
     case "w":
       move[0] = false;
@@ -541,7 +552,7 @@ window.addEventListener("keyup", function (event) {
       move[10] = false;
       break;
   }
-  playerBody.angularVelocity.set(0, 0, 0);
+  playerBody.angularVelocity.setZero();
 });
 
 document.addEventListener("click", function () {
@@ -557,8 +568,10 @@ document.body.addEventListener("mousemove", (event) => {
   if (document.pointerLockElement === document.body) {
     Pointer.x -= event.movementX / 600;
     Pointer.y += event.movementY / 800;
+    // console.log(camera.rotation);
+    // console.log(Pointer.x, Pointer.y);
     if (Perspective === "fp") {
-      if (Pointer.y > 1.55) {
+      if (Pointer.y > 1.5) {
         Pointer.y = 1.55;
       } else if (Pointer.y < -1.7) {
         Pointer.y = -1.7;
@@ -624,6 +637,13 @@ const nullify = () => {
 };
 leftpanhammer.on("panstart panend", function () {
   nullify();
+  if (!moving) {
+    PlayerLoad.prepareCrossFade(idleAction, walkAction, 1);
+    moving = true;
+  } else if (moving) {
+    PlayerLoad.prepareCrossFade(walkAction, idleAction, 1);
+    moving = true;
+  }
 });
 leftpanhammer.on("panmove", function (event) {
   switch (Math.round(event.angle * 0.01 + 0.1)) {
@@ -649,16 +669,21 @@ const tpcam = () => {
     player.position.y + Math.cos(Pointer.y) * 3 + 1.5,
     player.position.z + Math.cos(Pointer.x) * 2
   );
-  camera.lookAt(player.position);
+  camera.lookAt(player.position.x, player.position.y + 1, player.position.z);
 };
 const fpcam = () => {
-  // camera.position.set(
-  //   player.position.x + Math.sin(Pointer.x) * 0.01,
-  //   1 + player.position.y + Pointer.y * 0.01,
-  //   player.position.z + Math.cos(Pointer.x) * 0.01
-  // );
-  camera.rotation.set();
-  // camera.lookAt(player.position);
+  camera.position.set(
+    player.position.x,
+    1.5 + player.position.y,
+    player.position.z - 0.25
+  );
+  camera.lookAt(
+    new THREE.Vector3(
+      Math.sin(Pointer.x) * 4,
+      -Pointer.y * 4,
+      Math.cos(Pointer.x) * 4
+    )
+  );
 };
 function animate() {
   world.step(timestep);
@@ -667,15 +692,23 @@ function animate() {
 
   if (Perspective === "tp") {
     tpcam();
+    player.visible = true;
+    player.rotation.y = Pointer.x;
   } else if (Perspective === "fp") {
     fpcam();
+    player.visible = false;
   }
   playerMovement();
 
   PlayerLoad.Playeranimate();
 
-  player.position.copy(playerBody.position);
-  player.quaternion.set;
+  player.position.copy(
+    new cannon.Vec3(
+      playerBody.position.x,
+      playerBody.position.y - 0.8,
+      playerBody.position.z
+    )
+  );
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
