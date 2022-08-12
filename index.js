@@ -518,6 +518,8 @@ window.addEventListener("keyup", function (event) {
 
 document.addEventListener("click", function () {
   document.documentElement.requestFullscreen();
+  screen.orientation.lock("landscape-primary");
+  document.orien;
   if (play == true) {
     document.body.requestPointerLock();
   }
