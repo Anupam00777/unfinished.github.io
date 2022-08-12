@@ -77,12 +77,63 @@
       #rightcontrols {
         right: 0;
       }
+      #orienWarn {
+        z-index: 3;
+        width: 79vw;
+        height: 79vh;
+        border: 10px solid rgb(255, 0, 0);
+        background-color: yellow;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        display: none;
+      }
+      #orw {
+        margin: 10px auto;
+        width: 100%;
+        text-align: center;
+      }
+      #instructions {
+        z-index: 3;
+        width: 80vw;
+        height: auto;
+        position: absolute;
+        background-color: rgb(0, 247, 255);
+        border: 2px solid black;
+        color: rgb(64, 165, 224);
+        display: none;
+        align-items: center;
+        list-style: inside;
+        top: 10px;
+      }
+      #instCancel {
+        color: black;
+        right: 2px;
+        position: absolute;
+        background: red;
+      }
     </style>
   </head>
   <body>
     <div id="leftcontrols" class="controlArea flex"></div>
     <div id="rightcontrols" class="controlArea flex"></div>
+    <div id="instructions" class="flex">
+      <span
+        ><ul>
+          <li>Swipe on Left Side To Move (or use WASD)</li>
+          <li>Swipe on right to look around (or use MOUSE)</li>
+          <li>Double tap right to jump(or use SPACE)</li>
+          <li>Click 'P' to change Perspective(or press P)</li>
+        </ul></span
+      >
+      <span id="instCancel"><b>X</b></span>
+    </div>
     <div class="wrapper flex">
+      <div id="orienWarn" class="flex">
+        <span id="orw"
+          ><h2>Please Change Your Orientation to Landscape</h2>
+        </span>
+      </div>
       <div class="container">
         <div class="logo"></div>
         <div class="menu grid">

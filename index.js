@@ -394,7 +394,6 @@ function playerMovement() {
     );
   }
   if (move[4]) {
-    console.log(playerBody.velocity);
     if (playerBody.velocity.y === 0) {
       playerBody.applyImpulse(
         new cannon.Vec3(0, 5, 0),
@@ -426,23 +425,33 @@ function playerMovement() {
     );
   }
 }
-window.addEventListener("keydown", function (event) {
-  // console.log(event.key);
-  if (!moving) {
-    PlayerLoad.prepareCrossFade(idleAction, walkAction, 1);
-    moving = true;
+let ismoving = false;
+function PlayerActions() {
+  if (moving && !ismoving) {
+    PlayerLoad.prepareCrossFade(idleAction, walkAction, 0.5);
+    moving = false;
   }
+  if (!moving && ismoving) {
+    PlayerLoad.prepareCrossFade(walkAction, idleAction, 0.5);
+    ismoving = false;
+  }
+}
+window.addEventListener("keydown", function (event) {
   switch (event.key) {
     case "w":
+      moving = true;
       move[0] = true;
       break;
     case "s":
+      moving = true;
       move[1] = true;
       break;
     case "a":
+      moving = true;
       move[2] = true;
       break;
     case "d":
+      moving = true;
       move[3] = true;
       break;
     case " ":
@@ -472,22 +481,21 @@ window.addEventListener("keydown", function (event) {
   }
 });
 window.addEventListener("keyup", function (event) {
-  // now.stop();
-  if (moving) {
-    PlayerLoad.prepareCrossFade(walkAction, idleAction, 0.5);
-    moving = false;
-  }
   switch (event.key) {
     case "w":
+      ismoving = true;
       move[0] = false;
       break;
     case "s":
+      ismoving = true;
       move[1] = false;
       break;
     case "a":
+      ismoving = true;
       move[2] = false;
       break;
     case "d":
+      ismoving = true;
       move[3] = false;
       break;
     case " ":
@@ -515,18 +523,12 @@ window.addEventListener("keyup", function (event) {
   playerBody.angularVelocity.setZero();
   playerBody.velocity.setZero();
 });
-
 document.addEventListener("click", function () {
-  document.documentElement.requestFullscreen();
-  screen.orientation.lock("landscape-primary");
-  document.orien;
+  // document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
 });
-let xs = 0;
-let ys = 0;
-let zs = 0;
 document.body.addEventListener("mousemove", (event) => {
   if (document.pointerLockElement === document.body) {
     Pointer.x -= event.movementX / 600;
@@ -549,6 +551,7 @@ document.body.addEventListener("mousemove", (event) => {
   }
 });
 window.onresize = () => {
+  orWarn();
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -598,15 +601,13 @@ const nullify = () => {
   move[2] = false;
   move[3] = false;
 };
-leftpanhammer.on("panstart panend", function () {
+leftpanhammer.on("panstart ", function () {
   nullify();
-  if (!moving) {
-    PlayerLoad.prepareCrossFade(idleAction, runAction, 1);
-    moving = true;
-  } else if (moving) {
-    PlayerLoad.prepareCrossFade(runAction, idleAction, 1);
-    moving = true;
-  }
+  moving = true;
+});
+leftpanhammer.on("panend", function () {
+  nullify();
+  ismoving = true;
 });
 leftpanhammer.on("panmove", function (event) {
   switch (Math.round(event.angle * 0.01 + 0.1)) {
@@ -661,7 +662,7 @@ function animate() {
     player.visible = false;
   }
   playerMovement();
-
+  PlayerActions();
   PlayerLoad.Playeranimate();
 
   player.position.copy(
@@ -677,11 +678,29 @@ function animate() {
 }
 //////////////////////////////////////////////////////
 const GUI = document.getElementsByClassName("wrapper")[0];
+const orien = document.getElementById("orienWarn");
+const instructions = document.getElementById("instructions");
+const instCancle = document.getElementById("instCancel");
+function orWarn() {
+  if (window.innerHeight > window.innerWidth) {
+    orien.style.display = "flex";
+  } else {
+    orien.style.display = "none";
+  }
+}
+function instructor() {
+  instructions.style.display = "flex";
+}
+
+instCancle.addEventListener("click", function () {
+  instructions.style.display = "none";
+});
 
 document
   .getElementsByClassName("play")[0]
   .addEventListener("click", function () {
     if (loading === false) {
+      instructor();
       play = true;
       GUI.style.display = "none";
       animate();
@@ -689,3 +708,4 @@ document
       alert("The game is still Loading...");
     }
   });
+orWarn();
