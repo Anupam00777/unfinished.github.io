@@ -11,7 +11,7 @@ let actions;
 let skeleton, mixer, clock;
 let idleAction, walkAction, runAction;
 let play = false;
-let Perspective = "fp";
+let Perspective = "tp";
 let ob3d = [];
 let bd3d = [];
 let mob3d = [];
@@ -152,6 +152,7 @@ class playerLoader {
     gloader.load("assets/models/Soldier.glb", function (gltf) {
       player = gltf.scene;
       scene.add(player);
+      player.castShadow = true;
 
       player.traverse(function (object) {
         if (object.isMesh) object.castShadow = true;
@@ -183,11 +184,11 @@ class playerLoader {
     };
   }
 
-  // pauseAllActions() {
-  //   actions.forEach(function (action) {
-  //     action.paused = true;
-  //   });
-  // }
+  pauseAllActions() {
+    actions.forEach(function (action) {
+      action.paused = true;
+    });
+  }
 
   unPauseAllActions() {
     actions.forEach(function (action) {
@@ -196,49 +197,18 @@ class playerLoader {
   }
 
   prepareCrossFade(startAction, endAction, defaultDuration) {
-    // Switch default / custom crossfade duration (according to the user's choice)
     const duration = defaultDuration;
-
-    // Make sure that we don't go on in singleStepMode, and that all actions are unpaused
 
     this.unPauseAllActions();
 
-    // If the current action is 'idle' (duration 4 sec), execute the crossfade immediately;
-    // else wait until the current action has finished its current loop
-
-    // if (startAction === idleAction) {
     this.executeCrossFade(startAction, endAction, duration);
-    // } else {
-    //   this.synchronizeCrossFade(startAction, endAction, duration);
-    // }
   }
-
-  // synchronizeCrossFade(startAction, endAction, duration) {
-  //   mixer.addEventListener("loop", onLoopFinished);
-
-  //   const onLoopFinished=(event)=> {
-  //     if (event.action === startAction) {
-  //       mixer.removeEventListener("loop", onLoopFinished);
-
-  //       this.executeCrossFade(startAction, endAction, duration);
-  //     }
-  //   }
-  // }
 
   executeCrossFade(startAction, endAction, duration) {
-    // Not only the start action, but also the end action must get a weight of 1 before fading
-    // (concerning the start action this is already guaranteed in this place)
-
     this.setWeight(endAction, 1);
     endAction.time = 0;
-
-    // Crossfade with warping - you can also try without warping by setting the third parameter to false
-
     startAction.crossFadeTo(endAction, duration, true);
   }
-
-  // This function is needed, since animationAction.crossFadeTo() disables its start action and sets
-  // the start action's timeScale to ((start animation's duration) / (end animation's duration))
 
   setWeight(action, weight) {
     action.enabled = true;
@@ -246,9 +216,6 @@ class playerLoader {
     action.setEffectiveWeight(weight);
   }
   Playeranimate() {
-    // idleWeight = idleAction.getEffectiveWeight();
-    // walkWeight = walkAction.getEffectiveWeight();
-    // runWeight = runAction.getEffectiveWeight();
     let mixerUpdateDelta = clock.getDelta();
     mixer.update(mixerUpdateDelta);
   }
@@ -345,13 +312,6 @@ const playerBody = new cannon.Body({
   linearDamping: 0.6,
   angularDamping: 1,
 });
-// const box = new cannon.Body({
-//   shape: new cannon.Box(new cannon.Vec3(100, 0.25, 100)),
-//   mass: 0,
-//   position: new cannon.Vec3(3, 15, 0),
-
-//   linearDamping: 0.2,
-// });
 let tp = {};
 const nloader = new objectLoader();
 nloader.loadobj("Prop_Crate", 200, 1);
@@ -366,9 +326,7 @@ const rayCaster = new THREE.Raycaster();
 const Pointer = new THREE.Vector2();
 
 //////////////////////////////////////////////////////
-
-// player.castShadow = true;
-// terrain.receiveShadow = true;
+terrain.receiveShadow = true;
 
 let move = [
   false,
@@ -384,59 +342,65 @@ let move = [
   false,
 ];
 let now = new THREE.Clock();
-let deltaTime;
+let playerDir = 0;
 let moving = false;
 function playerMovement() {
   if (move[0]) {
+    playerDir = 0;
     playerBody.angularVelocity.set(
-      MoveDir.z * 20 * (1 + deltaTime * 0.1),
+      MoveDir.z * 8,
       playerBody.velocity.y,
-      -MoveDir.x * 20 * (1 + deltaTime * 0.1)
+      -MoveDir.x * 8
     );
     playerBody.applyForce(
-      new cannon.Vec3(
-        MoveDir.x * 12 * (1 + deltaTime * 0.1),
-        0,
-        MoveDir.z * 12 * (1 + deltaTime * 0.1)
-      ),
+      new cannon.Vec3(MoveDir.x * 12, 0, MoveDir.z * 12),
       new cannon.Vec3(1, 0, 1)
     );
   }
   if (move[1]) {
+    playerDir = 3;
     playerBody.angularVelocity.set(
       -MoveDir.z * 8,
       playerBody.velocity.y,
       MoveDir.x * 8
     );
     playerBody.applyForce(
-      new cannon.Vec3(-MoveDir.x * 12, 0, -MoveDir.z * 12),
+      new cannon.Vec3(-MoveDir.x * 8, 0, -MoveDir.z * 8),
       new cannon.Vec3(1, 0, 1)
     );
   }
   if (move[2]) {
+    playerDir = 1.5;
     playerBody.angularVelocity.set(
       -MoveDir.x * 8,
       playerBody.velocity.y,
       -MoveDir.z * 8
     );
     playerBody.applyForce(
-      new cannon.Vec3(MoveDir.z * 12, 0, -MoveDir.x * 12),
+      new cannon.Vec3(MoveDir.z * 8, 0, -MoveDir.x * 8),
       new cannon.Vec3(1, 0, 1)
     );
   }
   if (move[3]) {
+    playerDir = -1.5;
     playerBody.angularVelocity.set(
       MoveDir.x * 8,
       playerBody.velocity.y,
       MoveDir.z * 8
     );
     playerBody.applyForce(
-      new cannon.Vec3(-MoveDir.z * 12, 0, MoveDir.x * 12),
+      new cannon.Vec3(-MoveDir.z * 8, 0, MoveDir.x * 8),
       new cannon.Vec3(1, 0, 1)
     );
   }
   if (move[4]) {
-    playerBody.applyImpulse(new cannon.Vec3(0, 5, 0), new cannon.Vec3(0, 2, 0));
+    console.log(playerBody.velocity);
+    if (playerBody.velocity.y === 0) {
+      playerBody.applyImpulse(
+        new cannon.Vec3(0, 5, 0),
+        new cannon.Vec3(0, 2, 0)
+      );
+    }
   }
   if (move[5]) {
     playerBody.velocity.set(0, playerBody.velocity.y, 0);
@@ -463,13 +427,9 @@ function playerMovement() {
   }
 }
 window.addEventListener("keydown", function (event) {
-  if (!now.running) {
-    now.start();
-  }
-  deltaTime = now.getElapsedTime();
   // console.log(event.key);
   if (!moving) {
-    PlayerLoad.prepareCrossFade(idleAction, runAction, 1);
+    PlayerLoad.prepareCrossFade(idleAction, walkAction, 1);
     moving = true;
   }
   switch (event.key) {
@@ -512,9 +472,9 @@ window.addEventListener("keydown", function (event) {
   }
 });
 window.addEventListener("keyup", function (event) {
-  now.stop();
+  // now.stop();
   if (moving) {
-    PlayerLoad.prepareCrossFade(runAction, idleAction, 0.5);
+    PlayerLoad.prepareCrossFade(walkAction, idleAction, 0.5);
     moving = false;
   }
   switch (event.key) {
@@ -553,10 +513,11 @@ window.addEventListener("keyup", function (event) {
       break;
   }
   playerBody.angularVelocity.setZero();
+  playerBody.velocity.setZero();
 });
 
 document.addEventListener("click", function () {
-  // document.documentElement.requestFullscreen();
+  document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
@@ -638,17 +599,16 @@ const nullify = () => {
 leftpanhammer.on("panstart panend", function () {
   nullify();
   if (!moving) {
-    PlayerLoad.prepareCrossFade(idleAction, walkAction, 1);
+    PlayerLoad.prepareCrossFade(idleAction, runAction, 1);
     moving = true;
   } else if (moving) {
-    PlayerLoad.prepareCrossFade(walkAction, idleAction, 1);
+    PlayerLoad.prepareCrossFade(runAction, idleAction, 1);
     moving = true;
   }
 });
 leftpanhammer.on("panmove", function (event) {
   switch (Math.round(event.angle * 0.01 + 0.1)) {
     case -1:
-      deltaTime = event.deltaTime * 0.01;
       move[0] = true;
       break;
     case 1:
@@ -693,7 +653,7 @@ function animate() {
   if (Perspective === "tp") {
     tpcam();
     player.visible = true;
-    player.rotation.y = Pointer.x;
+    player.rotation.y = Pointer.x + playerDir;
   } else if (Perspective === "fp") {
     fpcam();
     player.visible = false;
