@@ -284,7 +284,7 @@ const material1 = new THREE.MeshStandardMaterial({
   roughnessMap: b3,
 });
 const material2 = new THREE.MeshStandardMaterial({
-  wireframe: true,
+  color: 0x848484,
 });
 
 const terrain = new THREE.Mesh(geometry1, material1);
@@ -351,15 +351,6 @@ let playerDir = 0;
 let moving = false;
 function playerMovement() {
   if (move[0]) {
-    // playerBody.angularVelocity.set(
-    //   MoveDir.z * 8,
-    //   playerBody.velocity.y,
-    //   -MoveDir.x * 8
-    // );
-    // playerBody.applyForce(
-    //   new cannon.Vec3(MoveDir.x * 12, 0, MoveDir.z * 12),
-    //   new cannon.Vec3(1, 0, 1)
-    // );
     playerBody.velocity.set(
       MoveDir.z * 8,
       playerBody.velocity.y,
@@ -367,15 +358,6 @@ function playerMovement() {
     );
   }
   if (move[1]) {
-    // playerBody.angularVelocity.set(
-    //   -MoveDir.z * 8,
-    //   playerBody.velocity.y,
-    //   MoveDir.x * 8
-    // );
-    // playerBody.applyForce(
-    //   new cannon.Vec3(-MoveDir.x * 8, 0, -MoveDir.z * 8),
-    //   new cannon.Vec3(1, 0, 1)
-    // );
     playerBody.velocity.set(
       -MoveDir.z * 8,
       playerBody.velocity.y,
@@ -383,15 +365,6 @@ function playerMovement() {
     );
   }
   if (move[2]) {
-    //   playerBody.angularVelocity.set(
-    //   -MoveDir.x * 8,
-    //   playerBody.velocity.y,
-    //   -MoveDir.z * 8
-    // );
-    // playerBody.applyForce(
-    //   new cannon.Vec3(MoveDir.z * 8, 0, -MoveDir.x * 8),
-    //   new cannon.Vec3(1, 0, 1)
-    //   );
     playerBody.velocity.set(
       -MoveDir.x * 8,
       playerBody.velocity.y,
@@ -399,15 +372,6 @@ function playerMovement() {
     );
   }
   if (move[3]) {
-    //   playerBody.angularVelocity.set(
-    //   MoveDir.x * 8,
-    //   playerBody.velocity.y,
-    //   MoveDir.z * 8
-    // );
-    // playerBody.applyForce(
-    //   new cannon.Vec3(-MoveDir.z * 8, 0, MoveDir.x * 8),
-    //   new cannon.Vec3(1, 0, 1)
-    // );
     playerBody.velocity.set(
       MoveDir.x * 8,
       playerBody.velocity.y,
@@ -435,11 +399,6 @@ function playerMovement() {
     console.log(MoveDir);
   }
   if (move[10]) {
-    playerBody.angularVelocity.set(
-      playerBody.velocity.x,
-      30,
-      playerBody.velocity.z
-    );
   }
 }
 let ismoving = false;
@@ -623,16 +582,14 @@ leftpanhammer.on("panend", function () {
   playerBody.velocity.setZero();
   ismoving = true;
 });
+let PlayerVector = new THREE.Vector3();
 leftpanhammer.on("panmove", function (event) {
-  console.log(
-    event
-    // ,event.angle / -180, (event.angle + 90) / -180
-  );
+  player.getWorldDirection(PlayerVector);
   playerDir = (event.angle + 90) / -60;
   playerBody.velocity.set(
-    (MoveDir.x + (event.angle + 90) / -180) * 8,
+    -PlayerVector.x * 8,
     playerBody.velocity.y,
-    (MoveDir.z + (event.angle + 90) / -180) * 8
+    -PlayerVector.z * 8
   );
 });
 //////////////////////////////////////////////////////
@@ -697,6 +654,7 @@ const GUI = document.getElementsByClassName("wrapper")[0];
 const orien = document.getElementById("orienWarn");
 const instructions = document.getElementById("instructions");
 const instCancle = document.getElementById("instCancel");
+const hitboxTog = document.getElementById("hitboxTog");
 function orWarn() {
   if (window.innerHeight > window.innerWidth) {
     orien.style.display = "flex";
@@ -707,7 +665,13 @@ function orWarn() {
 function instructor() {
   instructions.style.display = "flex";
 }
-
+hitboxTog.addEventListener("click", function () {
+  if (PlayerHitbox.visible) {
+    PlayerHitbox.visible = false;
+  } else {
+    PlayerHitbox.visible = true;
+  }
+});
 instCancle.addEventListener("click", function () {
   instructions.style.display = "none";
 });

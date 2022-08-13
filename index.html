@@ -112,6 +112,20 @@
         position: absolute;
         background: red;
       }
+      #buttons {
+        width: 120px;
+        height: 30px;
+        padding: 2px;
+        background-color: gray;
+        border: 1px solid rgb(47, 47, 47);
+        top: 0;
+        position: fixed;
+      }
+      .toolBTN {
+        background: rgb(37, 37, 37);
+        color: white;
+        grid-row: 1;
+      }
     </style>
   </head>
   <body>
@@ -127,6 +141,12 @@
         </ul></span
       >
       <span id="instCancel"><b>X</b></span>
+    </div>
+    <div id="buttons" class="grid">
+      <button class="toolBTN">P</button>
+      <button id="hitboxTog" class="toolBTN">H</button>
+      <button class="toolBTN">I</button>
+      <button class="toolBTN">C</button>
     </div>
     <div class="wrapper flex">
       <div id="orienWarn" class="flex">
