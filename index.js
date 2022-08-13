@@ -524,7 +524,6 @@ window.addEventListener("keyup", function (event) {
   playerBody.velocity.setZero();
 });
 document.addEventListener("click", function () {
-  document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
@@ -700,6 +699,7 @@ document
   .getElementsByClassName("play")[0]
   .addEventListener("click", function () {
     if (loading === false) {
+      document.documentElement.requestFullscreen();
       instructor();
       play = true;
       GUI.style.display = "none";
