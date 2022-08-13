@@ -525,7 +525,6 @@ window.addEventListener("keyup", function (event) {
 });
 document.addEventListener("click", function () {
   document.documentElement.requestFullscreen();
-  alert("touch");
   if (play == true) {
     document.body.requestPointerLock();
   }
