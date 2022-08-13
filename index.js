@@ -276,15 +276,20 @@ const grid = new THREE.GridHelper(10);
 scene.add(pivot, grid);
 
 const geometry1 = new THREE.PlaneBufferGeometry(100, 100);
+const geometry2 = new THREE.BoxBufferGeometry(0.6, 1.6, 0.6);
 
 const material1 = new THREE.MeshStandardMaterial({
   color: 0x848484,
   normalMap: b2,
   roughnessMap: b3,
 });
+const material2 = new THREE.MeshStandardMaterial({
+  wireframe: true,
+});
 
 const terrain = new THREE.Mesh(geometry1, material1);
-scene.add(terrain);
+const PlayerHitbox = new THREE.Mesh(geometry2, material2);
+scene.add(terrain, PlayerHitbox);
 const PlayerLoad = new playerLoader();
 //////////////////////////////////////////////////////
 
@@ -295,7 +300,7 @@ const world = new cannon.World({
 const cm1 = new cannon.Material();
 const cm2 = new cannon.Material();
 const c12 = new cannon.ContactMaterial(cm1, cm2, {
-  friction: 0.9,
+  friction: 0,
   restitution: 0,
 });
 
@@ -305,7 +310,7 @@ const groundbody = new cannon.Body({
   material: cm1,
 });
 const playerBody = new cannon.Body({
-  shape: new cannon.Sphere(0.8),
+  shape: new cannon.Box(new cannon.Vec3(0.3, 0.8, 0.3)),
   position: new cannon.Vec3(0, 5, 0),
   mass: 5,
   material: cm2,
@@ -346,51 +351,67 @@ let playerDir = 0;
 let moving = false;
 function playerMovement() {
   if (move[0]) {
-    playerDir = 0;
-    playerBody.angularVelocity.set(
+    // playerBody.angularVelocity.set(
+    //   MoveDir.z * 8,
+    //   playerBody.velocity.y,
+    //   -MoveDir.x * 8
+    // );
+    // playerBody.applyForce(
+    //   new cannon.Vec3(MoveDir.x * 12, 0, MoveDir.z * 12),
+    //   new cannon.Vec3(1, 0, 1)
+    // );
+    playerBody.velocity.set(
       MoveDir.z * 8,
       playerBody.velocity.y,
       -MoveDir.x * 8
     );
-    playerBody.applyForce(
-      new cannon.Vec3(MoveDir.x * 12, 0, MoveDir.z * 12),
-      new cannon.Vec3(1, 0, 1)
-    );
   }
   if (move[1]) {
-    playerDir = 3;
-    playerBody.angularVelocity.set(
+    // playerBody.angularVelocity.set(
+    //   -MoveDir.z * 8,
+    //   playerBody.velocity.y,
+    //   MoveDir.x * 8
+    // );
+    // playerBody.applyForce(
+    //   new cannon.Vec3(-MoveDir.x * 8, 0, -MoveDir.z * 8),
+    //   new cannon.Vec3(1, 0, 1)
+    // );
+    playerBody.velocity.set(
       -MoveDir.z * 8,
       playerBody.velocity.y,
       MoveDir.x * 8
     );
-    playerBody.applyForce(
-      new cannon.Vec3(-MoveDir.x * 8, 0, -MoveDir.z * 8),
-      new cannon.Vec3(1, 0, 1)
-    );
   }
   if (move[2]) {
-    playerDir = 1.5;
-    playerBody.angularVelocity.set(
+    //   playerBody.angularVelocity.set(
+    //   -MoveDir.x * 8,
+    //   playerBody.velocity.y,
+    //   -MoveDir.z * 8
+    // );
+    // playerBody.applyForce(
+    //   new cannon.Vec3(MoveDir.z * 8, 0, -MoveDir.x * 8),
+    //   new cannon.Vec3(1, 0, 1)
+    //   );
+    playerBody.velocity.set(
       -MoveDir.x * 8,
       playerBody.velocity.y,
       -MoveDir.z * 8
     );
-    playerBody.applyForce(
-      new cannon.Vec3(MoveDir.z * 8, 0, -MoveDir.x * 8),
-      new cannon.Vec3(1, 0, 1)
-    );
   }
   if (move[3]) {
-    playerDir = -1.5;
-    playerBody.angularVelocity.set(
+    //   playerBody.angularVelocity.set(
+    //   MoveDir.x * 8,
+    //   playerBody.velocity.y,
+    //   MoveDir.z * 8
+    // );
+    // playerBody.applyForce(
+    //   new cannon.Vec3(-MoveDir.z * 8, 0, MoveDir.x * 8),
+    //   new cannon.Vec3(1, 0, 1)
+    // );
+    playerBody.velocity.set(
       MoveDir.x * 8,
       playerBody.velocity.y,
       MoveDir.z * 8
-    );
-    playerBody.applyForce(
-      new cannon.Vec3(-MoveDir.z * 8, 0, MoveDir.x * 8),
-      new cannon.Vec3(1, 0, 1)
     );
   }
   if (move[4]) {
@@ -411,11 +432,7 @@ function playerMovement() {
   if (move[8]) {
   }
   if (move[9]) {
-    playerBody.angularVelocity.set(
-      playerBody.velocity.x,
-      30,
-      playerBody.velocity.z
-    );
+    console.log(MoveDir);
   }
   if (move[10]) {
     playerBody.angularVelocity.set(
@@ -439,18 +456,22 @@ function PlayerActions() {
 window.addEventListener("keydown", function (event) {
   switch (event.key) {
     case "w":
+      playerDir = 0;
       moving = true;
       move[0] = true;
       break;
     case "s":
+      playerDir = 3;
       moving = true;
       move[1] = true;
       break;
     case "a":
+      playerDir = 1.5;
       moving = true;
       move[2] = true;
       break;
     case "d":
+      playerDir = -1.5;
       moving = true;
       move[3] = true;
       break;
@@ -520,11 +541,11 @@ window.addEventListener("keyup", function (event) {
       move[10] = false;
       break;
   }
-  playerBody.angularVelocity.setZero();
+  // playerBody.angularVelocity.setZero();
   playerBody.velocity.setZero();
 });
 document.addEventListener("click", function () {
-  document.documentElement.requestFullscreen();
+  // document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
@@ -595,35 +616,24 @@ rightpanhammer.on("pan", function (event) {
 rightpanhammer.on("doubletap", function () {
   playerBody.applyImpulse(new cannon.Vec3(0, 70, 0), new cannon.Vec3(0, 2, 0));
 });
-const nullify = () => {
-  move[0] = false;
-  move[1] = false;
-  move[2] = false;
-  move[3] = false;
-};
 leftpanhammer.on("panstart ", function () {
-  nullify();
   moving = true;
 });
 leftpanhammer.on("panend", function () {
-  nullify();
+  playerBody.velocity.setZero();
   ismoving = true;
 });
 leftpanhammer.on("panmove", function (event) {
-  switch (Math.round(event.angle * 0.01 + 0.1)) {
-    case -1:
-      move[0] = true;
-      break;
-    case 1:
-      move[1] = true;
-      break;
-    case 2:
-      move[2] = true;
-      break;
-    case 0:
-      move[3] = true;
-      break;
-  }
+  console.log(
+    event
+    // ,event.angle / -180, (event.angle + 90) / -180
+  );
+  playerDir = (event.angle + 90) / -60;
+  playerBody.velocity.set(
+    (MoveDir.x + (event.angle + 90) / -180) * 8,
+    playerBody.velocity.y,
+    (MoveDir.z + (event.angle + 90) / -180) * 8
+  );
 });
 //////////////////////////////////////////////////////
 const tpcam = () => {
@@ -665,6 +675,9 @@ function animate() {
   PlayerActions();
   PlayerLoad.Playeranimate();
 
+  playerBody.quaternion.x = 0;
+  playerBody.quaternion.z = 0;
+
   player.position.copy(
     new cannon.Vec3(
       playerBody.position.x,
@@ -672,6 +685,9 @@ function animate() {
       playerBody.position.z
     )
   );
+
+  PlayerHitbox.position.copy(playerBody.position);
+  PlayerHitbox.quaternion.copy(playerBody.quaternion);
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
