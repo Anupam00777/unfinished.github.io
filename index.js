@@ -539,7 +539,7 @@ window.addEventListener("keyup", function (event) {
   playerBody.velocity.setZero();
 });
 document.addEventListener("click", function () {
-  // document.documentElement.requestFullscreen();
+  document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
@@ -548,8 +548,6 @@ document.body.addEventListener("mousemove", (event) => {
   if (document.pointerLockElement === document.body) {
     Pointer.x -= event.movementX / 600;
     Pointer.y += event.movementY / 800;
-    // console.log(camera.rotation);
-    // console.log(Pointer.x, Pointer.y);
     if (Perspective === "fp") {
       if (Pointer.y > 1.5) {
         Pointer.y = 1.55;
