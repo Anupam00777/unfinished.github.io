@@ -598,15 +598,17 @@ leftpanhammer.add(
 );
 
 rightpanhammer.on("pan", function (event) {
-  Pointer.x -= event.changedPointers[0].movementX / 200;
-  Pointer.y += event.changedPointers[0].movementY / 200;
   if (Perspective === "fp") {
+    Pointer.x += event.changedPointers[0].movementX / 200;
+    Pointer.y -= event.changedPointers[0].movementY / 200;
     if (Pointer.y > 1.5) {
       Pointer.y = 1.55;
     } else if (Pointer.y < -1.7) {
       Pointer.y = -1.7;
     }
   } else if (Perspective === "tp") {
+    Pointer.x -= event.changedPointers[0].movementX / 200;
+    Pointer.y += event.changedPointers[0].movementY / 200;
     if (Pointer.y > 2) {
       Pointer.y = 2;
     } else if (Pointer.y < 1) {
