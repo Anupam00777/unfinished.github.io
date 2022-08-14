@@ -421,13 +421,17 @@ function PlayerActions(x) {
       PlayerLoad.prepareCrossFade(currentAction, idleAction, 0.5, tAction, 0);
       break;
     case 1:
-      PlayerLoad.prepareCrossFade(currentAction, walkAction, 0.5, tAction, 0);
+      if (move[5]) {
+        PlayerLoad.prepareCrossFade(currentAction, runAction, 0.5, tAction, 0);
+      } else {
+        PlayerLoad.prepareCrossFade(currentAction, walkAction, 0.5, tAction, 0);
+      }
       break;
     case 2:
-      PlayerLoad.prepareCrossFade(currentAction, runAction, 0.5, tAction, 0);
+      PlayerLoad.prepareCrossFade(currentAction, runAction, 2, tAction, 0.5);
       break;
     case 3:
-      PlayerLoad.prepareCrossFade(currentAction, runAction, 2, tAction, 0.5);
+      PlayerLoad.prepareCrossFade(currentAction, runAction, 0.5, tAction, 0);
       break;
     case 4:
       break;
@@ -438,7 +442,10 @@ function PlayerActions(x) {
   }
 }
 window.addEventListener("keydown", function (event) {
-  switch (event.key) {
+  console.log(move);
+  console.log(event.key);
+  console.log(event.key.toLowerCase());
+  switch (event.key.toLowerCase()) {
     case "w":
       PlayerActions(1);
       playerDir = 0;
@@ -462,13 +469,14 @@ window.addEventListener("keydown", function (event) {
     case " ":
       move[4] = true;
       break;
-    case "Shift":
+    case "e":
       move[5] = true;
       break;
     case "Control":
       move[6] = true;
       break;
     case "ArrowUp":
+      PlayerActions(3);
       move[7] = true;
       break;
     case "ArrowDown":
@@ -477,7 +485,7 @@ window.addEventListener("keydown", function (event) {
     case "q":
       move[9] = true;
       break;
-    case "e":
+    case "Shift":
       move[10] = true;
       break;
     case "p":
@@ -505,7 +513,7 @@ window.addEventListener("keyup", function (event) {
     case " ":
       move[4] = false;
       break;
-    case "Shift":
+    case "e":
       move[5] = false;
       break;
     case "Control":
@@ -520,11 +528,13 @@ window.addEventListener("keyup", function (event) {
     case "q":
       move[9] = false;
       break;
-    case "e":
+    case "Shift":
       move[10] = false;
       break;
   }
-  PlayerActions(0);
+  if (!move.slice(0, 5).includes(true)) {
+    PlayerActions(0);
+  }
   playerBody.velocity.setZero();
 });
 document.addEventListener("click", function () {
@@ -668,7 +678,6 @@ function animate() {
     player.visible = false;
   }
   playerMovement();
-  PlayerActions();
   PlayerLoad.Playeranimate();
 
   playerBody.quaternion.x = 0;
