@@ -142,11 +142,28 @@
         color: white;
         grid-row: 1;
       }
+      #sprint {
+        z-index: 2;
+        width: 10vh;
+        height: 10vh;
+        position: absolute;
+        border-top: 4px solid rgb(255, 255, 255);
+        border-left: 4px solid rgb(255, 255, 255);
+        border-right: 4px solid rgb(0, 0, 0);
+        border-bottom: 4px solid rgb(0, 0, 0);
+        border-radius: 50%;
+        bottom: 5px;
+        right: 5px;
+        align-items: center;
+        justify-content: center;
+        font-size: 6vh; 
+      }
     </style>
   </head>
   <body>
     <div id="leftcontrols" class="controlArea flex"></div>
     <div id="rightcontrols" class="controlArea flex"></div>
+    <div id="sprint" class="flex"> <span>&#127939</span> 	</div>
     <div id="instructions" class="flex">
       <span
         ><ul>

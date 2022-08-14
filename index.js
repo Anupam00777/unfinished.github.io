@@ -84,6 +84,7 @@ class objectLoader {
       const body = new cannon.Body({
         shape: shape,
         mass: 0,
+        material: cm2,
         offset: offset,
         position: p,
         orientation: quaternion,
@@ -539,7 +540,7 @@ window.addEventListener("keyup", function (event) {
   playerBody.velocity.setZero();
 });
 document.addEventListener("click", function () {
-  document.documentElement.requestFullscreen();
+  // document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
@@ -651,11 +652,17 @@ leftpanhammer.on("panmove", function (event) {
 //////////////////////////////////////////////////////
 const p = document.getElementById("p");
 const h = document.getElementById("h");
+const sprint = document.getElementById("sprint");
 p.addEventListener("click", function () {
   togglePerspective();
 });
 h.addEventListener("click", function () {
   hitboxToggle();
+});
+sprint.addEventListener("click", function () {
+  running === false ? (running = true) : (running = false);
+  let x = sprint.style.background;
+  x === "" ? (sprint.style.background = "red") : (sprint.style.background = "");
 });
 const togglePerspective = () => {
   Perspective == "tp" ? (Perspective = "fp") : (Perspective = "tp");
