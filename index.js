@@ -354,46 +354,52 @@ let move = [
 ];
 let now = new THREE.Clock();
 let playerDir = 0;
+let speedFactor = 1;
 function playerMovement() {
   if (move[0]) {
     PlayerActions(1);
     playerDir = 0;
     playerBody.velocity.set(
-      MoveDir.x * 8,
+      MoveDir.x * 2 * speedFactor,
       playerBody.velocity.y,
-      MoveDir.z * 8
+      MoveDir.z * 2 * speedFactor
     );
   }
   if (move[1]) {
     PlayerActions(1);
     playerDir = 3;
     playerBody.velocity.set(
-      -MoveDir.x * 8,
+      -MoveDir.x * 2 * speedFactor,
       playerBody.velocity.y,
-      -MoveDir.z * 8
+      -MoveDir.z * 2 * speedFactor
     );
   }
   if (move[2]) {
     PlayerActions(1);
     playerDir = 1.5;
     playerBody.velocity.set(
-      MoveDir.z * 8,
+      MoveDir.z * 2 * speedFactor,
       playerBody.velocity.y,
-      -MoveDir.x * 8
+      -MoveDir.x * 2 * speedFactor
     );
   }
   if (move[3]) {
     PlayerActions(1);
     playerDir = -1.5;
     playerBody.velocity.set(
-      -MoveDir.z * 8,
+      -MoveDir.z * 2 * speedFactor,
       playerBody.velocity.y,
-      MoveDir.x * 8
+      MoveDir.x * 2 * speedFactor
     );
   }
   if (move[4]) {
-    PlayerLoad.setWeight(tAction, weigh);
-    playerBody.applyImpulse(new cannon.Vec3(0, 5, 0), new cannon.Vec3(0, 2, 0));
+    if (160 <= Math.round(playerBody.velocity.y * Math.pow(10, 17)) <= 200) {
+      PlayerLoad.setWeight(tAction, weigh);
+      playerBody.applyImpulse(
+        new cannon.Vec3(0, 50, 0),
+        new cannon.Vec3(0, 2, 0)
+      );
+    }
   }
   if (move[5]) {
   }
@@ -405,11 +411,12 @@ function playerMovement() {
   if (move[8]) {
   }
   if (move[9]) {
-    console.log(playerBody);
+    console.log(playerBody.velocity.y);
   }
   if (move[10]) {
   }
 }
+let running = false;
 let weigh = 0;
 function PlayerActions(x) {
   switch (x) {
@@ -417,7 +424,7 @@ function PlayerActions(x) {
       PlayerLoad.prepareCrossFade(currentAction, idleAction, 0.5);
       break;
     case 1:
-      if (move[5]) {
+      if (running) {
         PlayerLoad.prepareCrossFade(currentAction, runAction, 0.5);
       } else {
         PlayerLoad.prepareCrossFade(currentAction, walkAction, 0.5);
@@ -457,6 +464,8 @@ window.addEventListener("keydown", function (event) {
       move[4] = true;
       break;
     case "shift":
+      speedFactor = 4;
+      running = true;
       move[5] = true;
       break;
     case "control":
@@ -504,6 +513,8 @@ window.addEventListener("keyup", function (event) {
       move[4] = false;
       break;
     case "shift":
+      running = false;
+      speedFactor = 1;
       move[5] = false;
       break;
     case "control":
@@ -588,12 +599,20 @@ leftpanhammer.add(
 );
 
 rightpanhammer.on("pan", function (event) {
-  Pointer.x -= event.velocityX / 10;
-  Pointer.y += event.velocityY / 10;
-  if (Pointer.y > 2) {
-    Pointer.y = 2;
-  } else if (Pointer.y < 1) {
-    Pointer.y = 1;
+  Pointer.x -= event.changedPointers[0].movementX / 200;
+  Pointer.y += event.changedPointers[0].movementY / 200;
+  if (Perspective === "fp") {
+    if (Pointer.y > 1.5) {
+      Pointer.y = 1.55;
+    } else if (Pointer.y < -1.7) {
+      Pointer.y = -1.7;
+    }
+  } else if (Perspective === "tp") {
+    if (Pointer.y > 2) {
+      Pointer.y = 2;
+    } else if (Pointer.y < 1) {
+      Pointer.y = 1;
+    }
   }
 });
 rightpanhammer.on("doubletap", function () {
@@ -615,13 +634,21 @@ leftpanhammer.on("panend", function () {
 });
 let PlayerVector = new THREE.Vector3();
 leftpanhammer.on("panmove", function (event) {
-  player.getWorldDirection(PlayerVector);
-  playerDir = (event.angle + 90) / -60;
-  playerBody.velocity.set(
-    -PlayerVector.x * 8,
-    playerBody.velocity.y,
-    -PlayerVector.z * 8
-  );
+  if (Perspective === "tp") {
+    player.getWorldDirection(PlayerVector);
+    playerDir = (event.angle + 90) / -60;
+    playerBody.velocity.set(
+      -PlayerVector.x * 2,
+      playerBody.velocity.y,
+      -PlayerVector.z * 2
+    );
+  } else if (Perspective === "fp") {
+    playerBody.velocity.set(
+      MoveDir.x * 2 * speedFactor,
+      playerBody.velocity.y,
+      MoveDir.z * 2 * speedFactor
+    );
+  }
 });
 //////////////////////////////////////////////////////
 const p = document.getElementById("p");
@@ -643,10 +670,13 @@ const hitboxToggle = () => {
 };
 
 function jump() {
-  // if (Math.round(playerBody.velocity.y) == -3) {
-  PlayerLoad.setWeight(tAction, weigh);
-  playerBody.applyImpulse(new cannon.Vec3(0, 50, 0), new cannon.Vec3(0, 2, 0));
-  // }
+  if (160 <= Math.round(playerBody.velocity.y * Math.pow(10, 17)) <= 200) {
+    PlayerLoad.setWeight(tAction, weigh);
+    playerBody.applyImpulse(
+      new cannon.Vec3(0, 50, 0),
+      new cannon.Vec3(0, 2, 0)
+    );
+  }
 }
 
 const tpcam = () => {
@@ -661,7 +691,7 @@ const fpcam = () => {
   camera.position.set(
     player.position.x,
     1.5 + player.position.y,
-    player.position.z - 0.25
+    player.position.z
   );
   camera.lookAt(
     new THREE.Vector3(
@@ -700,7 +730,6 @@ function animate() {
 
   PlayerHitbox.position.copy(playerBody.position);
   PlayerHitbox.quaternion.copy(playerBody.quaternion);
-
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 }
