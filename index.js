@@ -637,9 +637,9 @@ leftpanhammer.on("panmove", function (event) {
     player.getWorldDirection(PlayerVector);
     playerDir = (event.angle + 90) / -60;
     playerBody.velocity.set(
-      -PlayerVector.x * 2,
+      -PlayerVector.x * 2 * speedFactor,
       playerBody.velocity.y,
-      -PlayerVector.z * 2
+      -PlayerVector.z * 2 * speedFactor
     );
   } else if (Perspective === "fp") {
     playerBody.velocity.set(
