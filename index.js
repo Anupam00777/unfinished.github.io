@@ -180,7 +180,7 @@ class playerLoader {
       this.setWeight(idleAction, 1);
       this.setWeight(walkAction, 0);
       this.setWeight(runAction, 0);
-      this.setWeight(tAction, 0.5);
+      this.setWeight(tAction, 0);
 
       actions.forEach(function (action) {
         action.play();
@@ -200,26 +200,18 @@ class playerLoader {
     });
   }
 
-  prepareCrossFade(startAction, endAction, defaultDuration, subAction, weight) {
+  prepareCrossFade(startAction, endAction, defaultDuration) {
     const duration = defaultDuration;
 
-    this.unPauseAllActions();
     if (endAction != currentAction) {
-      this.executeCrossFade(
-        startAction,
-        endAction,
-        duration,
-        subAction,
-        weight
-      );
+      this.executeCrossFade(startAction, endAction, duration);
     }
   }
 
-  executeCrossFade(startAction, endAction, duration, subAction, weight) {
+  executeCrossFade(startAction, endAction, duration) {
     this.setWeight(endAction, 1);
     endAction.time = 0;
     startAction.crossFadeTo(endAction, duration, true);
-    this.setWeight(subAction, weight);
     currentAction = endAction;
   }
 
@@ -400,7 +392,6 @@ function playerMovement() {
     );
   }
   if (move[4]) {
-    playerBody.applyImpulse(new cannon.Vec3(0, 5, 0), new cannon.Vec3(0, 2, 0));
   }
   if (move[5]) {
   }
@@ -421,32 +412,20 @@ let weigh = 0;
 function PlayerActions(x) {
   switch (x) {
     case 0:
-      PlayerLoad.prepareCrossFade(currentAction, idleAction, 0.5, tAction, 0);
+      PlayerLoad.prepareCrossFade(currentAction, idleAction, 0.5);
       break;
     case 1:
       if (move[5]) {
-        PlayerLoad.prepareCrossFade(
-          currentAction,
-          runAction,
-          0.5,
-          tAction,
-          weigh
-        );
+        PlayerLoad.prepareCrossFade(currentAction, runAction, 0.5);
       } else {
-        PlayerLoad.prepareCrossFade(
-          currentAction,
-          walkAction,
-          0.5,
-          tAction,
-          weigh
-        );
+        PlayerLoad.prepareCrossFade(currentAction, walkAction, 0.5);
       }
       break;
     case 2:
-      PlayerLoad.prepareCrossFade(currentAction, runAction, 2, tAction, 0.5);
+      PlayerLoad.prepareCrossFade(currentAction, runAction, 2);
       break;
     case 3:
-      PlayerLoad.prepareCrossFade(currentAction, runAction, 0.5, tAction, 0);
+      PlayerLoad.prepareCrossFade(currentAction, runAction, 0.5);
       break;
     case 4:
       break;
@@ -471,7 +450,9 @@ window.addEventListener("keydown", function (event) {
       move[3] = true;
       break;
     case " ":
-      weigh = 0.5;
+      weigh = 1;
+      PlayerLoad.pauseAllActions();
+      jump();
       move[4] = true;
       break;
     case "shift":
@@ -517,6 +498,8 @@ window.addEventListener("keyup", function (event) {
       break;
     case " ":
       weigh = 0;
+      PlayerLoad.setWeight(tAction, weigh);
+      PlayerLoad.unPauseAllActions();
       move[4] = false;
       break;
     case "shift":
@@ -604,6 +587,8 @@ leftpanhammer.add(
 );
 
 rightpanhammer.on("pan", function (event) {
+  console.log(playerBody.velocity.y);
+
   Pointer.x -= event.velocityX / 10;
   Pointer.y += event.velocityY / 10;
   if (Pointer.y > 2) {
@@ -613,10 +598,20 @@ rightpanhammer.on("pan", function (event) {
   }
 });
 rightpanhammer.on("doubletap", function () {
-  playerBody.applyImpulse(new cannon.Vec3(0, 70, 0), new cannon.Vec3(0, 2, 0));
+  weigh = 1;
+  PlayerLoad.pauseAllActions();
+  jump();
+  setTimeout(function () {
+    PlayerLoad.unPauseAllActions();
+    weigh = 0;
+    PlayerLoad.setWeight(tAction, weigh);
+  }, 500);
 });
-leftpanhammer.on("panstart ", function () {});
+leftpanhammer.on("panstart ", function () {
+  PlayerActions(1);
+});
 leftpanhammer.on("panend", function () {
+  PlayerActions(0);
   playerBody.velocity.setZero();
 });
 let PlayerVector = new THREE.Vector3();
@@ -647,6 +642,13 @@ const hitboxToggle = () => {
     ? (PlayerHitbox.visible = true)
     : (PlayerHitbox.visible = false);
 };
+
+function jump() {
+  // if (Math.round(playerBody.velocity.y) == -3) {
+  PlayerLoad.setWeight(tAction, weigh);
+  playerBody.applyImpulse(new cannon.Vec3(0, 5, 0), new cannon.Vec3(0, 2, 0));
+  // }
+}
 
 const tpcam = () => {
   camera.position.set(
