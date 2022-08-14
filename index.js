@@ -8,8 +8,9 @@ import { GLTFLoader } from "./GLTFLoader.js";
 let loading = true;
 let player;
 let actions;
+let currentAction;
 let skeleton, mixer, clock;
-let idleAction, walkAction, runAction;
+let idleAction, walkAction, runAction, tAction;
 let play = false;
 let Perspective = "tp";
 let ob3d = [];
@@ -168,15 +169,18 @@ class playerLoader {
       idleAction = mixer.clipAction(animations[0]);
       walkAction = mixer.clipAction(animations[3]);
       runAction = mixer.clipAction(animations[1]);
+      tAction = mixer.clipAction(animations[2]);
 
-      actions = [idleAction, walkAction, runAction];
+      actions = [idleAction, walkAction, runAction, tAction];
       activateAllActions();
+      currentAction = idleAction;
       loading = false;
     });
     const activateAllActions = () => {
       this.setWeight(idleAction, 1);
       this.setWeight(walkAction, 0);
       this.setWeight(runAction, 0);
+      this.setWeight(tAction, 0);
 
       actions.forEach(function (action) {
         action.play();
@@ -196,18 +200,28 @@ class playerLoader {
     });
   }
 
-  prepareCrossFade(startAction, endAction, defaultDuration) {
+  prepareCrossFade(startAction, endAction, defaultDuration, subAction, weight) {
     const duration = defaultDuration;
 
     this.unPauseAllActions();
-
-    this.executeCrossFade(startAction, endAction, duration);
+    if (endAction != currentAction) {
+      this.executeCrossFade(
+        startAction,
+        endAction,
+        duration,
+        subAction,
+        weight
+      );
+    }
   }
 
-  executeCrossFade(startAction, endAction, duration) {
+  executeCrossFade(startAction, endAction, duration, subAction, weight) {
     this.setWeight(endAction, 1);
+    this.setWeight(subAction, weight);
     endAction.time = 0;
+    subAction.time = 0;
     startAction.crossFadeTo(endAction, duration, true);
+    currentAction = endAction;
   }
 
   setWeight(action, weight) {
@@ -284,12 +298,13 @@ const material1 = new THREE.MeshStandardMaterial({
   roughnessMap: b3,
 });
 const material2 = new THREE.MeshStandardMaterial({
-  color: 0x848484,
+  wireframe: true,
 });
 
 const terrain = new THREE.Mesh(geometry1, material1);
 const PlayerHitbox = new THREE.Mesh(geometry2, material2);
 scene.add(terrain, PlayerHitbox);
+PlayerHitbox.visible = false;
 const PlayerLoad = new playerLoader();
 //////////////////////////////////////////////////////
 
@@ -348,34 +363,33 @@ let move = [
 ];
 let now = new THREE.Clock();
 let playerDir = 0;
-let moving = false;
 function playerMovement() {
   if (move[0]) {
     playerBody.velocity.set(
-      MoveDir.z * 8,
+      MoveDir.x * 8,
       playerBody.velocity.y,
-      -MoveDir.x * 8
+      MoveDir.z * 8
     );
   }
   if (move[1]) {
-    playerBody.velocity.set(
-      -MoveDir.z * 8,
-      playerBody.velocity.y,
-      MoveDir.x * 8
-    );
-  }
-  if (move[2]) {
     playerBody.velocity.set(
       -MoveDir.x * 8,
       playerBody.velocity.y,
       -MoveDir.z * 8
     );
   }
+  if (move[2]) {
+    playerBody.velocity.set(
+      MoveDir.z * 8,
+      playerBody.velocity.y,
+      -MoveDir.x * 8
+    );
+  }
   if (move[3]) {
     playerBody.velocity.set(
-      MoveDir.x * 8,
+      -MoveDir.z * 8,
       playerBody.velocity.y,
-      MoveDir.z * 8
+      MoveDir.x * 8
     );
   }
   if (move[4]) {
@@ -387,9 +401,9 @@ function playerMovement() {
     }
   }
   if (move[5]) {
-    playerBody.velocity.set(0, playerBody.velocity.y, 0);
   }
   if (move[6]) {
+    playerBody.velocity.set(0, playerBody.velocity.y, 0);
   }
   if (move[7]) {
   }
@@ -401,46 +415,57 @@ function playerMovement() {
   if (move[10]) {
   }
 }
-let ismoving = false;
-function PlayerActions() {
-  if (moving && !ismoving) {
-    PlayerLoad.prepareCrossFade(idleAction, walkAction, 0.5);
-    moving = false;
-  }
-  if (!moving && ismoving) {
-    PlayerLoad.prepareCrossFade(walkAction, idleAction, 0.5);
-    ismoving = false;
+function PlayerActions(x) {
+  switch (x) {
+    case 0:
+      PlayerLoad.prepareCrossFade(currentAction, idleAction, 0.5, tAction, 0);
+      break;
+    case 1:
+      PlayerLoad.prepareCrossFade(currentAction, walkAction, 0.5, tAction, 0);
+      break;
+    case 2:
+      PlayerLoad.prepareCrossFade(currentAction, runAction, 0.5, tAction, 0);
+      break;
+    case 3:
+      PlayerLoad.prepareCrossFade(currentAction, runAction, 2, tAction, 0.5);
+      break;
+    case 4:
+      break;
+    case 5:
+      break;
+    case 6:
+      break;
   }
 }
 window.addEventListener("keydown", function (event) {
   switch (event.key) {
     case "w":
+      PlayerActions(1);
       playerDir = 0;
-      moving = true;
       move[0] = true;
       break;
     case "s":
+      PlayerActions(1);
       playerDir = 3;
-      moving = true;
       move[1] = true;
       break;
     case "a":
+      PlayerActions(1);
       playerDir = 1.5;
-      moving = true;
       move[2] = true;
       break;
     case "d":
+      PlayerActions(1);
       playerDir = -1.5;
-      moving = true;
       move[3] = true;
       break;
     case " ":
       move[4] = true;
       break;
-    case "Control":
+    case "Shift":
       move[5] = true;
       break;
-    case "ArrowLeft":
+    case "Control":
       move[6] = true;
       break;
     case "ArrowUp":
@@ -456,35 +481,34 @@ window.addEventListener("keydown", function (event) {
       move[10] = true;
       break;
     case "p":
-      Perspective == "tp" ? (Perspective = "fp") : (Perspective = "tp");
+      togglePerspective();
+      break;
+    case "h":
+      hitboxToggle();
       break;
   }
 });
 window.addEventListener("keyup", function (event) {
   switch (event.key) {
     case "w":
-      ismoving = true;
       move[0] = false;
       break;
     case "s":
-      ismoving = true;
       move[1] = false;
       break;
     case "a":
-      ismoving = true;
       move[2] = false;
       break;
     case "d":
-      ismoving = true;
       move[3] = false;
       break;
     case " ":
       move[4] = false;
       break;
-    case "Control":
+    case "Shift":
       move[5] = false;
       break;
-    case "ArrowLeft":
+    case "Control":
       move[6] = false;
       break;
     case "ArrowUp":
@@ -500,7 +524,7 @@ window.addEventListener("keyup", function (event) {
       move[10] = false;
       break;
   }
-  // playerBody.angularVelocity.setZero();
+  PlayerActions(0);
   playerBody.velocity.setZero();
 });
 document.addEventListener("click", function () {
@@ -575,12 +599,9 @@ rightpanhammer.on("pan", function (event) {
 rightpanhammer.on("doubletap", function () {
   playerBody.applyImpulse(new cannon.Vec3(0, 70, 0), new cannon.Vec3(0, 2, 0));
 });
-leftpanhammer.on("panstart ", function () {
-  moving = true;
-});
+leftpanhammer.on("panstart ", function () {});
 leftpanhammer.on("panend", function () {
   playerBody.velocity.setZero();
-  ismoving = true;
 });
 let PlayerVector = new THREE.Vector3();
 leftpanhammer.on("panmove", function (event) {
@@ -593,6 +614,24 @@ leftpanhammer.on("panmove", function (event) {
   );
 });
 //////////////////////////////////////////////////////
+const p = document.getElementById("p");
+const h = document.getElementById("h");
+p.addEventListener("click", function () {
+  togglePerspective();
+});
+h.addEventListener("click", function () {
+  hitboxToggle();
+});
+const togglePerspective = () => {
+  Perspective == "tp" ? (Perspective = "fp") : (Perspective = "tp");
+};
+const hitboxToggle = () => {
+  console.log(PlayerHitbox.visible);
+  PlayerHitbox.visible == false
+    ? (PlayerHitbox.visible = true)
+    : (PlayerHitbox.visible = false);
+};
+
 const tpcam = () => {
   camera.position.set(
     player.position.x + Math.sin(Pointer.x) * 2,
@@ -654,7 +693,6 @@ const GUI = document.getElementsByClassName("wrapper")[0];
 const orien = document.getElementById("orienWarn");
 const instructions = document.getElementById("instructions");
 const instCancle = document.getElementById("instCancel");
-const hitboxTog = document.getElementById("hitboxTog");
 function orWarn() {
   if (window.innerHeight > window.innerWidth) {
     orien.style.display = "flex";
@@ -662,19 +700,12 @@ function orWarn() {
     orien.style.display = "none";
   }
 }
-function instructor() {
-  instructions.style.display = "flex";
-}
-hitboxTog.addEventListener("click", function () {
-  if (PlayerHitbox.visible) {
-    PlayerHitbox.visible = false;
-  } else {
-    PlayerHitbox.visible = true;
-  }
-});
 instCancle.addEventListener("click", function () {
   instructions.style.display = "none";
 });
+function instructor() {
+  instructions.style.display = "flex";
+}
 
 document
   .getElementsByClassName("play")[0]
