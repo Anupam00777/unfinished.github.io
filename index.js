@@ -180,7 +180,7 @@ class playerLoader {
       this.setWeight(idleAction, 1);
       this.setWeight(walkAction, 0);
       this.setWeight(runAction, 0);
-      this.setWeight(tAction, 0);
+      this.setWeight(tAction, 0.5);
 
       actions.forEach(function (action) {
         action.play();
@@ -217,10 +217,9 @@ class playerLoader {
 
   executeCrossFade(startAction, endAction, duration, subAction, weight) {
     this.setWeight(endAction, 1);
-    this.setWeight(subAction, weight);
     endAction.time = 0;
-    subAction.time = 0;
     startAction.crossFadeTo(endAction, duration, true);
+    this.setWeight(subAction, weight);
     currentAction = endAction;
   }
 
@@ -365,6 +364,8 @@ let now = new THREE.Clock();
 let playerDir = 0;
 function playerMovement() {
   if (move[0]) {
+    PlayerActions(1);
+    playerDir = 0;
     playerBody.velocity.set(
       MoveDir.x * 8,
       playerBody.velocity.y,
@@ -372,6 +373,8 @@ function playerMovement() {
     );
   }
   if (move[1]) {
+    PlayerActions(1);
+    playerDir = 3;
     playerBody.velocity.set(
       -MoveDir.x * 8,
       playerBody.velocity.y,
@@ -379,6 +382,8 @@ function playerMovement() {
     );
   }
   if (move[2]) {
+    PlayerActions(1);
+    playerDir = 1.5;
     playerBody.velocity.set(
       MoveDir.z * 8,
       playerBody.velocity.y,
@@ -386,6 +391,8 @@ function playerMovement() {
     );
   }
   if (move[3]) {
+    PlayerActions(1);
+    playerDir = -1.5;
     playerBody.velocity.set(
       -MoveDir.z * 8,
       playerBody.velocity.y,
@@ -393,12 +400,7 @@ function playerMovement() {
     );
   }
   if (move[4]) {
-    if (playerBody.velocity.y === 0) {
-      playerBody.applyImpulse(
-        new cannon.Vec3(0, 5, 0),
-        new cannon.Vec3(0, 2, 0)
-      );
-    }
+    playerBody.applyImpulse(new cannon.Vec3(0, 5, 0), new cannon.Vec3(0, 2, 0));
   }
   if (move[5]) {
   }
@@ -415,6 +417,7 @@ function playerMovement() {
   if (move[10]) {
   }
 }
+let weigh = 0;
 function PlayerActions(x) {
   switch (x) {
     case 0:
@@ -422,9 +425,21 @@ function PlayerActions(x) {
       break;
     case 1:
       if (move[5]) {
-        PlayerLoad.prepareCrossFade(currentAction, runAction, 0.5, tAction, 0);
+        PlayerLoad.prepareCrossFade(
+          currentAction,
+          runAction,
+          0.5,
+          tAction,
+          weigh
+        );
       } else {
-        PlayerLoad.prepareCrossFade(currentAction, walkAction, 0.5, tAction, 0);
+        PlayerLoad.prepareCrossFade(
+          currentAction,
+          walkAction,
+          0.5,
+          tAction,
+          weigh
+        );
       }
       break;
     case 2:
@@ -442,37 +457,27 @@ function PlayerActions(x) {
   }
 }
 window.addEventListener("keydown", function (event) {
-  console.log(move);
-  console.log(event.key);
-  console.log(event.key.toLowerCase());
   switch (event.key.toLowerCase()) {
     case "w":
-      PlayerActions(1);
-      playerDir = 0;
       move[0] = true;
       break;
     case "s":
-      PlayerActions(1);
-      playerDir = 3;
       move[1] = true;
       break;
     case "a":
-      PlayerActions(1);
-      playerDir = 1.5;
       move[2] = true;
       break;
     case "d":
-      PlayerActions(1);
-      playerDir = -1.5;
       move[3] = true;
       break;
     case " ":
+      weigh = 0.5;
       move[4] = true;
       break;
-    case "e":
+    case "shift":
       move[5] = true;
       break;
-    case "Control":
+    case "control":
       move[6] = true;
       break;
     case "ArrowUp":
@@ -485,7 +490,7 @@ window.addEventListener("keydown", function (event) {
     case "q":
       move[9] = true;
       break;
-    case "Shift":
+    case "e":
       move[10] = true;
       break;
     case "p":
@@ -497,7 +502,7 @@ window.addEventListener("keydown", function (event) {
   }
 });
 window.addEventListener("keyup", function (event) {
-  switch (event.key) {
+  switch (event.key.toLowerCase()) {
     case "w":
       move[0] = false;
       break;
@@ -511,12 +516,13 @@ window.addEventListener("keyup", function (event) {
       move[3] = false;
       break;
     case " ":
+      weigh = 0;
       move[4] = false;
       break;
-    case "e":
+    case "shift":
       move[5] = false;
       break;
-    case "Control":
+    case "control":
       move[6] = false;
       break;
     case "ArrowUp":
@@ -528,7 +534,7 @@ window.addEventListener("keyup", function (event) {
     case "q":
       move[9] = false;
       break;
-    case "Shift":
+    case "e":
       move[10] = false;
       break;
   }
