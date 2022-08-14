@@ -660,8 +660,11 @@ h.addEventListener("click", function () {
   hitboxToggle();
 });
 sprint.addEventListener("click", function () {
-  running === false ? (running = true) : (running = false);
+  running === false
+    ? ((running = true), (speedFactor = 4))
+    : ((running = false), (speedFactor = 1));
   let x = sprint.style.background;
+
   x === "" ? (sprint.style.background = "red") : (sprint.style.background = "");
 });
 const togglePerspective = () => {
