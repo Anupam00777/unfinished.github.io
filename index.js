@@ -527,7 +527,7 @@ window.addEventListener("keyup", function (event) {
   playerBody.velocity.setZero();
 });
 document.addEventListener("click", function () {
-  // document.documentElement.requestFullscreen();
+  document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
