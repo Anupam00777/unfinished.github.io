@@ -392,6 +392,8 @@ function playerMovement() {
     );
   }
   if (move[4]) {
+    PlayerLoad.setWeight(tAction, weigh);
+    playerBody.applyImpulse(new cannon.Vec3(0, 5, 0), new cannon.Vec3(0, 2, 0));
   }
   if (move[5]) {
   }
@@ -403,7 +405,7 @@ function playerMovement() {
   if (move[8]) {
   }
   if (move[9]) {
-    console.log(MoveDir);
+    console.log(playerBody);
   }
   if (move[10]) {
   }
@@ -452,7 +454,6 @@ window.addEventListener("keydown", function (event) {
     case " ":
       weigh = 1;
       PlayerLoad.pauseAllActions();
-      jump();
       move[4] = true;
       break;
     case "shift":
@@ -527,7 +528,7 @@ window.addEventListener("keyup", function (event) {
   playerBody.velocity.setZero();
 });
 document.addEventListener("click", function () {
-  document.documentElement.requestFullscreen();
+  // document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
@@ -587,8 +588,6 @@ leftpanhammer.add(
 );
 
 rightpanhammer.on("pan", function (event) {
-  console.log(playerBody.velocity.y);
-
   Pointer.x -= event.velocityX / 10;
   Pointer.y += event.velocityY / 10;
   if (Pointer.y > 2) {
@@ -646,7 +645,7 @@ const hitboxToggle = () => {
 function jump() {
   // if (Math.round(playerBody.velocity.y) == -3) {
   PlayerLoad.setWeight(tAction, weigh);
-  playerBody.applyImpulse(new cannon.Vec3(0, 5, 0), new cannon.Vec3(0, 2, 0));
+  playerBody.applyImpulse(new cannon.Vec3(0, 50, 0), new cannon.Vec3(0, 2, 0));
   // }
 }
 
