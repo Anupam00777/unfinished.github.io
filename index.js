@@ -598,8 +598,8 @@ leftpanhammer.add(
 );
 rightpanhammer.on("pan", function (event) {
   console.log(event.velocityX, event.velocityY);
-  Pointer.x -= event.velocityX;
-  Pointer.y += event.velocityY;
+  Pointer.x -= event.velocityX / 10;
+  Pointer.y += event.velocityY / 20;
   if (Perspective === "fp") {
     if (Pointer.y > 1.5) {
       Pointer.y = 1.55;
