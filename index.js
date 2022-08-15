@@ -597,7 +597,6 @@ leftpanhammer.add(
   }).recognizeWith([rightpanhammer.get("pan"), rightpanhammer.get("doubletap")])
 );
 rightpanhammer.on("pan", function (event) {
-  console.log(event.velocityX, event.velocityY);
   Pointer.x -= event.velocityX / 4;
   Pointer.y += event.velocityY / 8;
   if (Perspective === "fp") {
@@ -615,14 +614,7 @@ rightpanhammer.on("pan", function (event) {
   }
 });
 rightpanhammer.on("doubletap", function () {
-  weigh = 1;
-  PlayerLoad.pauseAllActions();
   jump();
-  setTimeout(function () {
-    PlayerLoad.unPauseAllActions();
-    weigh = 0;
-    PlayerLoad.setWeight(tAction, weigh);
-  }, 500);
 });
 leftpanhammer.on("panstart ", function () {
   PlayerActions(1);
@@ -671,7 +663,6 @@ const togglePerspective = () => {
   Perspective == "tp" ? (Perspective = "fp") : (Perspective = "tp");
 };
 const hitboxToggle = () => {
-  console.log(PlayerHitbox.visible);
   PlayerHitbox.visible == false
     ? (PlayerHitbox.visible = true)
     : (PlayerHitbox.visible = false);
@@ -679,14 +670,23 @@ const hitboxToggle = () => {
 
 function jump() {
   if (160 <= Math.round(playerBody.velocity.y * Math.pow(10, 17)) <= 200) {
+    weigh = 1;
+    PlayerLoad.pauseAllActions();
     PlayerLoad.setWeight(tAction, weigh);
     playerBody.applyImpulse(
       new cannon.Vec3(0, 50, 0),
       new cannon.Vec3(0, 2, 0)
     );
+    const jumpo = setInterval(function () {
+      if (160 <= Math.round(playerBody.velocity.y * Math.pow(10, 17)) <= 200) {
+        PlayerLoad.unPauseAllActions();
+        weigh = 0;
+        PlayerLoad.setWeight(tAction, weigh);
+        clearInterval(jumpo);
+      }
+    }, 100);
   }
 }
-
 const tpcam = () => {
   camera.position.set(
     player.position.x + Math.sin(Pointer.x) * 2,
@@ -774,5 +774,5 @@ document
   });
 orWarn();
 window.onload = () => {
-  document.getElementById("version").innerText = "1.12";
+  document.getElementById("version").innerText = "1.13";
 };
