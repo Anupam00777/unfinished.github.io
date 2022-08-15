@@ -597,8 +597,9 @@ leftpanhammer.add(
   }).recognizeWith([rightpanhammer.get("pan"), rightpanhammer.get("doubletap")])
 );
 rightpanhammer.on("pan", function (event) {
-  Pointer.x -= event.deltaX / 600;
-  Pointer.y += event.deltaY / 800;
+  console.log(event.velocityX, event.velocityY);
+  Pointer.x -= event.velocityX;
+  Pointer.y += event.velocityY;
   if (Perspective === "fp") {
     if (Pointer.y > 1.5) {
       Pointer.y = 1.55;
