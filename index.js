@@ -732,5 +732,5 @@ document
   });
 orWarn();
 window.onload = () => {
-  document.getElementById("version").innerText = "1.13";
+  document.getElementById("version").innerText = "1.14";
 };
