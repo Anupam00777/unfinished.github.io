@@ -1,9 +1,6 @@
 import * as cannon from "./cannon-es.js";
-import { OBJLoader } from "./OBJLoader.js";
-import { MTLLoader } from "./MTLLoader.js";
-import { threeToCannon, ShapeType } from "./three-to-cannon.modern.js";
 import { GLTFLoader } from "./GLTFLoader.js";
-
+import { objectLoader } from "./3Dloader.js";
 //////////////////////////////////////////////////////
 let loading = true;
 let player;
@@ -13,135 +10,81 @@ let skeleton, mixer, clock;
 let idleAction, walkAction, runAction, tAction;
 let play = false;
 let Perspective = "tp";
-let ob3d = [];
-let bd3d = [];
-let mob3d = [];
-let mbd3d = [];
-class objectLoader {
-  constructor(obj, k, m) {
-    this.obj = obj;
-    this.n = k;
-    this.ms = m;
-  }
-  loadobj(obj, n) {
-    let maxx = 2;
-    let minx = -2;
-    let maxy = 2;
-    let miny = 0;
-    let maxz = 2;
-    let minz = -2;
-    let x = 0;
-    let y = 0;
-    let z = 0;
-    let d = 0;
-    let pos;
+let shadowEnabledObjects = [];
+// class objectLoader {
+//   constructor() {}
+//   loadobj(obj, n) {
+//     let maxx = 2;
+//     let minx = -2;
+//     let maxy = 2;
+//     let miny = 0;
+//     let maxz = 2;
+//     let minz = -2;
+//     let x = 0;
+//     let y = 0;
+//     let z = 0;
+//     let d = 0;
+//     let pos;
 
-    for (let l = 0; l < n; l++) {
-      new MTLLoader()
-        .setPath("assets/hills/modular_platformer_models/")
-        .load(obj + ".mtl", function (materials) {
-          materials.preload();
+//     for (let l = 0; l < n; l++) {
+//       new MTLLoader()
+//         .setPath("assets/hills/modular_platformer_models/")
+//         .load(obj + ".mtl", function (materials) {
+//           materials.preload();
 
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("assets/hills/modular_platformer_models/")
-            .load(obj + ".obj", function (object) {
-              scene.add(object);
-              ob3d.push(object);
-              if (d == n - 1) {
-                summonBody(n);
-              }
-              d++;
-            });
-        });
-    }
+//           new OBJLoader()
+//             .setMaterials(materials)
+//             .setPath("assets/hills/modular_platformer_models/")
+//             .load(obj + ".obj", function (object) {
+//               scene.add(object);
+//               ob3d.push(object);
+//               if (d == n - 1) {
+//                 summonBody(n);
+//               }
+//               d++;
+//             });
+//         });
+//     }
 
-    const summonBody = (chunk) => {
-      for (let j = 0; j < chunk; j++) {
-        tp[j] = j;
-        tp[j] = [];
+//     const summonBody = (chunk) => {
+//       for (let j = 0; j < chunk; j++) {
+//         tp[j] = j;
+//         tp[j] = [];
 
-        while (!tp[j].includes(x + "-" + y + "-" + z)) {
-          x = Math.floor(Math.random() * (maxx - minx) + minx);
-          y = Math.floor(Math.random() * (maxy - miny) + miny);
-          z = Math.floor(Math.random() * (maxz - minz) + minz);
-          minx = x - minx;
-          miny = y + 2;
-          minz = z - minz;
-          maxx = minx + 4;
-          maxy = miny + 2;
-          maxz = minz + 4;
-          tp[j].push(x + "-" + y + "-" + z);
-        }
-        pos = new cannon.Vec3(x, y, z);
-        boundLoad(ob3d[j], pos);
-        ob3d[j].position.copy(pos);
-      }
-    };
-    const boundLoad = (object, p) => {
-      const object3d = threeToCannon(object, { type: ShapeType.HULL });
-      const { shape, offset, quaternion } = object3d;
-      const body = new cannon.Body({
-        shape: shape,
-        mass: 0,
-        material: cm2,
-        offset: offset,
-        position: p,
-        orientation: quaternion,
-      });
-      bd3d.push(body);
-      world.addBody(body);
-    };
-  }
-  massLoad(obj, n, ms) {
-    let x = 2;
-    let y = 2;
-    let pos;
-    for (let j = 0; j <= n; j++) {
-      new MTLLoader()
-        .setPath("assets/hills/modular_platformer_models/")
-        .load(obj + ".mtl", function (materials) {
-          materials.preload();
-
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("assets/hills/modular_platformer_models/")
-            .load(obj + ".obj", function (object) {
-              for (let i = 0; tp.includes(x + "-" + y); i++) {
-                x = Math.ceil(Math.random() * 100 - 50);
-                y = Math.ceil(Math.random() * 100 - 50);
-              }
-              tp.push(x + "-" + y);
-              pos = new cannon.Vec3(x, 0, y);
-              object.position.copy(pos);
-              mob3d.push(object);
-              massboundLoad(object);
-              scene.add(object);
-            });
-        });
-    }
-
-    const massboundLoad = (object) => {
-      const object3d = threeToCannon(object, { type: ShapeType.HULL });
-      const { shape, offset, quaternion } = object3d;
-      const body = new cannon.Body({
-        shape: shape,
-        mass: ms,
-        offset: offset,
-        position: pos,
-        orientation: quaternion,
-      });
-      mbd3d.push(body);
-      world.addBody(body);
-    };
-  }
-  update() {
-    for (let i = 0; i < ob3d.length; i++) {
-      mob3d[i].position.copy(mbd3d[i].position);
-      mob3d[i].quaternion.copy(mbd3d[i].quaternion);
-    }
-  }
-}
+//         while (!tp[j].includes(x + "-" + y + "-" + z)) {
+//           x = Math.floor(Math.random() * (maxx - minx) + minx);
+//           y = Math.floor(Math.random() * (maxy - miny) + miny);
+//           z = Math.floor(Math.random() * (maxz - minz) + minz);
+//           minx = x - minx;
+//           miny = y + 2;
+//           minz = z - minz;
+//           maxx = minx + 4;
+//           maxy = miny + 2;
+//           maxz = minz + 4;
+//           tp[j].push(x + "-" + y + "-" + z);
+//         }
+//         pos = new cannon.Vec3(x, y, z);
+//         boundLoad(ob3d[j], pos);
+//         ob3d[j].position.copy(pos);
+//       }
+//     };
+//     const boundLoad = (object, p) => {
+//       const object3d = threeToCannon(object, { type: ShapeType.HULL });
+//       const { shape, offset, quaternion } = object3d;
+//       const body = new cannon.Body({
+//         shape: shape,
+//         mass: 0,
+//         material: cm2,
+//         offset: offset,
+//         position: p,
+//         orientation: quaternion,
+//       });
+//       bd3d.push(body);
+//       world.addBody(body);
+//     };
+//     return;
+//   }
+// }
 class playerLoader {
   constructor() {
     this.playerLoad();
@@ -267,7 +210,7 @@ const environmentLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.3);
 scene.add(environmentLight);
 
 const dirLight = new THREE.DirectionalLight(0xffffff);
-dirLight.position.set(100, 100, -80);
+dirLight.position.set(3, 3, 3);
 dirLight.castShadow = true;
 dirLight.shadow.camera.top = 2;
 dirLight.shadow.camera.bottom = -2;
@@ -275,8 +218,8 @@ dirLight.shadow.camera.left = -2;
 dirLight.shadow.camera.right = 2;
 dirLight.shadow.camera.near = 0.1;
 dirLight.shadow.camera.far = 40;
-scene.add(dirLight);
-
+let lh = new THREE.DirectionalLightHelper(dirLight);
+scene.add(dirLight, lh, dirLight.target);
 const pivot = new THREE.AxesHelper(20);
 const grid = new THREE.GridHelper(10);
 scene.add(pivot, grid);
@@ -296,8 +239,18 @@ const material2 = new THREE.MeshStandardMaterial({
 const terrain = new THREE.Mesh(geometry1, material1);
 const PlayerHitbox = new THREE.Mesh(geometry2, material2);
 scene.add(terrain, PlayerHitbox);
-PlayerHitbox.visible = false;
 const PlayerLoad = new playerLoader();
+const oloader = new objectLoader();
+oloader.loadobj(
+  "assets/hills/modular_platformer_models/",
+  "Prop_Crate",
+  "Prop_Crate",
+  function (object) {
+    scene.add(object);
+    object.castShadow = true;
+  }
+);
+PlayerHitbox.visible = false;
 //////////////////////////////////////////////////////
 
 const world = new cannon.World({
@@ -324,9 +277,6 @@ const playerBody = new cannon.Body({
   linearDamping: 0.6,
   angularDamping: 1,
 });
-let tp = {};
-const nloader = new objectLoader();
-nloader.loadobj("Prop_Crate", 200, 1);
 world.addBody(groundbody);
 world.addBody(playerBody);
 world.addContactMaterial(c12);
@@ -540,7 +490,7 @@ window.addEventListener("keyup", function (event) {
   playerBody.velocity.setZero();
 });
 document.addEventListener("click", function () {
-  document.documentElement.requestFullscreen();
+  // document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
@@ -736,6 +686,13 @@ function animate() {
     )
   );
 
+  dirLight.position.copy(
+    new THREE.Vector3(
+      player.position.x + 3,
+      player.position.y + 3,
+      player.position.z + 3
+    )
+  );
   PlayerHitbox.position.copy(playerBody.position);
   PlayerHitbox.quaternion.copy(playerBody.quaternion);
   renderer.render(scene, camera);
@@ -768,6 +725,7 @@ document
       play = true;
       GUI.style.display = "none";
       animate();
+      dirLight.target = player;
     } else {
       alert("The game is still Loading...");
     }
