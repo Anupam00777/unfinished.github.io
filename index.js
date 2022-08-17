@@ -150,38 +150,7 @@ const material2 = new THREE.MeshStandardMaterial({
 const terrain = new THREE.Mesh(geometry1, material1);
 const PlayerHitbox = new THREE.Mesh(geometry2, material2);
 scene.add(terrain, PlayerHitbox);
-const gltfLoader = new load.gltfLoader();
-const PlayerLoad = new playerAnimator();
-const oloader = new load.objectLoader();
-// gltfLoader.gltfLoad("assets/models/city.glb", (a, b) => {
-//   const city = a;
-//   scene.add(city);
-// });
-gltfLoader.gltfLoad("assets/models/Soldier.glb", (x, y) => {
-  player = x;
-  gltf = y;
-  scene.add(player);
-  console.log(gltf);
-  PlayerLoad.Animate();
-  oloader.loadobj("assets/models/", "city", "city", (object) => {
-    scene.add(object);
-    console.log(object);
-    object.scale.set(new THREE.Vector3(0.5, 0.5, 0.5));
-    // object.position.set(new THREE.Vector3(0, 10, 0));
-    object.castShadow = true;
-  });
-});
-oloader.loadobj(
-  "assets/hills/modular_platformer_models/",
-  "Prop_Crate",
-  "Prop_Crate",
-  function (object) {
-    scene.add(object);
-    object.castShadow = true;
-  }
-);
-PlayerHitbox.visible = false;
-//////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
 const world = new cannon.World({
   gravity: new cannon.Vec3(0, -10, 0),
@@ -217,6 +186,43 @@ const timestep = 1 / 60;
 const rayCaster = new THREE.Raycaster();
 const Pointer = new THREE.Vector2();
 
+//////////////////////////////////////////////////////
+const gltfLoader = new load.gltfLoader();
+const PlayerLoad = new playerAnimator();
+const oloader = new load.objectLoader();
+// gltfLoader.gltfLoad("assets/models/city.glb", (a, b) => {
+//   const city = a;
+//   scene.add(city);
+// });
+gltfLoader.gltfLoad("assets/models/Soldier.glb", (x, y) => {
+  player = x;
+  gltf = y;
+  scene.add(player);
+  PlayerLoad.Animate();
+  oloader.loadobj("assets/models/", "city", "city", (object) => {
+    scene.add(object);
+    console.log(object);
+    // object.scale.set(0.03, 0.03, 0.03);
+    object.position.copy(new THREE.Vector3(0, 3.57, 0));
+    object.receiveShadow = true;
+    object.castShadow = true;
+    oloader.boundLoad(object, object.position, (body) => {
+      world.addBody(body);
+      console.log(body);
+    });
+  });
+});
+// oloader.loadobj(
+//   "assets/hills/modular_platformer_models/",
+//   "Prop_Crate",
+//   "Prop_Crate",
+//   function (object) {
+//     scene.add(object);
+//     object.castShadow = true;
+//     object.receiveShadow = true;
+//   }
+// );
+PlayerHitbox.visible = false;
 //////////////////////////////////////////////////////
 terrain.receiveShadow = true;
 

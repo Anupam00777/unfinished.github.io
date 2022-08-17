@@ -2,7 +2,7 @@ import { OBJLoader } from "./OBJLoader.js";
 import { GLTFLoader } from "./GLTFLoader.js";
 import { MTLLoader } from "./MTLLoader.js";
 import { threeToCannon, ShapeType } from "./three-to-cannon.modern.js";
-
+import * as cannon from "./cannon-es.js";
 class objectLoader {
   constructor() {}
   loadobj(path, obj, mtl, callback) {
@@ -23,7 +23,6 @@ class objectLoader {
     const body = new cannon.Body({
       shape: shape,
       mass: 0,
-      material: cm2,
       offset: offset,
       position: p,
       orientation: quaternion,
