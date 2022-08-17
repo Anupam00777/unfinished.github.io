@@ -110,10 +110,13 @@ const Texture = new THREE.TextureLoader();
 const b1 = Texture.load("assets/brick/b1.cm.jpg");
 const b2 = Texture.load("assets/brick/b1.nm.jpg");
 const b3 = Texture.load("assets/brick/b1.rm.jpg");
+b1.wrapS = THREE.RepeatWrapping;
+b1.wrapT = THREE.RepeatWrapping;
 b2.wrapS = THREE.RepeatWrapping;
 b2.wrapT = THREE.RepeatWrapping;
 b3.wrapS = THREE.RepeatWrapping;
 b3.wrapT = THREE.RepeatWrapping;
+b1.repeat.set(50, 50);
 b2.repeat.set(50, 50);
 b3.repeat.set(50, 50);
 
@@ -138,7 +141,8 @@ const geometry1 = new THREE.PlaneBufferGeometry(100, 100);
 const geometry2 = new THREE.BoxBufferGeometry(0.6, 1.6, 0.6);
 
 const material1 = new THREE.MeshStandardMaterial({
-  color: 0x848484,
+  // color: 0x848484,
+  map: b1,
   normalMap: b2,
   roughnessMap: b3,
 });
@@ -399,7 +403,7 @@ window.addEventListener("keyup", function (event) {
   playerBody.velocity.setZero();
 });
 document.addEventListener("click", function () {
-  // document.documentElement.requestFullscreen();
+  document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
@@ -641,5 +645,5 @@ document
   });
 orWarn();
 window.onload = () => {
-  document.getElementById("version").innerText = "1.14";
+  document.getElementById("version").innerText = "1.15";
 };
