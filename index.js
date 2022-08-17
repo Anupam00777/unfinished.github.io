@@ -129,8 +129,7 @@ dirLight.shadow.camera.left = -2;
 dirLight.shadow.camera.right = 2;
 dirLight.shadow.camera.near = 0.1;
 dirLight.shadow.camera.far = 40;
-let lh = new THREE.DirectionalLightHelper(dirLight);
-scene.add(dirLight, lh, dirLight.target);
+scene.add(dirLight, dirLight.target);
 const pivot = new THREE.AxesHelper(20);
 const grid = new THREE.GridHelper(10);
 scene.add(pivot, grid, light);
@@ -190,38 +189,12 @@ const Pointer = new THREE.Vector2();
 const gltfLoader = new load.gltfLoader();
 const PlayerLoad = new playerAnimator();
 const oloader = new load.objectLoader();
-// gltfLoader.gltfLoad("assets/models/city.glb", (a, b) => {
-//   const city = a;
-//   scene.add(city);
-// });
 gltfLoader.gltfLoad("assets/models/Soldier.glb", (x, y) => {
   player = x;
   gltf = y;
   scene.add(player);
   PlayerLoad.Animate();
-  oloader.loadobj("assets/models/", "city", "city", (object) => {
-    scene.add(object);
-    console.log(object);
-    // object.scale.set(0.03, 0.03, 0.03);
-    object.position.copy(new THREE.Vector3(0, 3.57, 0));
-    object.receiveShadow = true;
-    object.castShadow = true;
-    oloader.boundLoad(object, object.position, (body) => {
-      world.addBody(body);
-      console.log(body);
-    });
-  });
 });
-// oloader.loadobj(
-//   "assets/hills/modular_platformer_models/",
-//   "Prop_Crate",
-//   "Prop_Crate",
-//   function (object) {
-//     scene.add(object);
-//     object.castShadow = true;
-//     object.receiveShadow = true;
-//   }
-// );
 PlayerHitbox.visible = false;
 //////////////////////////////////////////////////////
 terrain.receiveShadow = true;
