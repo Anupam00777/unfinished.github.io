@@ -1,4 +1,5 @@
 import { OBJLoader } from "./OBJLoader.js";
+import { GLTFLoader } from "./GLTFLoader.js";
 import { MTLLoader } from "./MTLLoader.js";
 import { threeToCannon, ShapeType } from "./three-to-cannon.modern.js";
 
@@ -30,4 +31,20 @@ class objectLoader {
     callback(body);
   }
 }
-export { objectLoader };
+class gltfLoader {
+  constructor() {}
+
+  gltfLoad(objectPath, callback) {
+    const gloader = new GLTFLoader();
+    gloader.load(objectPath, function (gltf) {
+      let variableForModel = gltf.scene;
+      variableForModel.castShadow = true;
+
+      variableForModel.traverse(function (object) {
+        if (object.isMesh) object.castShadow = true;
+      });
+      callback(variableForModel, gltf);
+    });
+  }
+}
+export { objectLoader, gltfLoader };

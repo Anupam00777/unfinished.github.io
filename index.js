@@ -1,6 +1,5 @@
 import * as cannon from "./cannon-es.js";
-import { GLTFLoader } from "./GLTFLoader.js";
-import { objectLoader } from "./3Dloader.js";
+import * as load from "./3Dloader.js";
 //////////////////////////////////////////////////////
 let loading = true;
 let player;
@@ -9,127 +8,39 @@ let currentAction;
 let skeleton, mixer, clock;
 let idleAction, walkAction, runAction, tAction;
 let play = false;
+let gltf;
 let Perspective = "tp";
-let shadowEnabledObjects = [];
-// class objectLoader {
-//   constructor() {}
-//   loadobj(obj, n) {
-//     let maxx = 2;
-//     let minx = -2;
-//     let maxy = 2;
-//     let miny = 0;
-//     let maxz = 2;
-//     let minz = -2;
-//     let x = 0;
-//     let y = 0;
-//     let z = 0;
-//     let d = 0;
-//     let pos;
+class playerAnimator {
+  constructor() {}
 
-//     for (let l = 0; l < n; l++) {
-//       new MTLLoader()
-//         .setPath("assets/hills/modular_platformer_models/")
-//         .load(obj + ".mtl", function (materials) {
-//           materials.preload();
-
-//           new OBJLoader()
-//             .setMaterials(materials)
-//             .setPath("assets/hills/modular_platformer_models/")
-//             .load(obj + ".obj", function (object) {
-//               scene.add(object);
-//               ob3d.push(object);
-//               if (d == n - 1) {
-//                 summonBody(n);
-//               }
-//               d++;
-//             });
-//         });
-//     }
-
-//     const summonBody = (chunk) => {
-//       for (let j = 0; j < chunk; j++) {
-//         tp[j] = j;
-//         tp[j] = [];
-
-//         while (!tp[j].includes(x + "-" + y + "-" + z)) {
-//           x = Math.floor(Math.random() * (maxx - minx) + minx);
-//           y = Math.floor(Math.random() * (maxy - miny) + miny);
-//           z = Math.floor(Math.random() * (maxz - minz) + minz);
-//           minx = x - minx;
-//           miny = y + 2;
-//           minz = z - minz;
-//           maxx = minx + 4;
-//           maxy = miny + 2;
-//           maxz = minz + 4;
-//           tp[j].push(x + "-" + y + "-" + z);
-//         }
-//         pos = new cannon.Vec3(x, y, z);
-//         boundLoad(ob3d[j], pos);
-//         ob3d[j].position.copy(pos);
-//       }
-//     };
-//     const boundLoad = (object, p) => {
-//       const object3d = threeToCannon(object, { type: ShapeType.HULL });
-//       const { shape, offset, quaternion } = object3d;
-//       const body = new cannon.Body({
-//         shape: shape,
-//         mass: 0,
-//         material: cm2,
-//         offset: offset,
-//         position: p,
-//         orientation: quaternion,
-//       });
-//       bd3d.push(body);
-//       world.addBody(body);
-//     };
-//     return;
-//   }
-// }
-class playerLoader {
-  constructor() {
-    this.playerLoad();
-  }
-
-  playerLoad() {
+  Animate() {
     clock = new THREE.Clock();
+    skeleton = new THREE.SkeletonHelper(player);
+    skeleton.visible = false;
+    scene.add(skeleton);
+    const animations = gltf.animations;
 
-    const gloader = new GLTFLoader();
-    gloader.load("assets/models/Soldier.glb", function (gltf) {
-      player = gltf.scene;
-      scene.add(player);
-      player.castShadow = true;
+    mixer = new THREE.AnimationMixer(player);
 
-      player.traverse(function (object) {
-        if (object.isMesh) object.castShadow = true;
-      });
-      skeleton = new THREE.SkeletonHelper(player);
-      skeleton.visible = false;
-      scene.add(skeleton);
+    idleAction = mixer.clipAction(animations[0]);
+    walkAction = mixer.clipAction(animations[3]);
+    runAction = mixer.clipAction(animations[1]);
+    tAction = mixer.clipAction(animations[2]);
 
-      const animations = gltf.animations;
+    actions = [idleAction, walkAction, runAction, tAction];
+    this.activateAllActions();
+    currentAction = idleAction;
+    loading = false;
+  }
+  activateAllActions() {
+    this.setWeight(idleAction, 1);
+    this.setWeight(walkAction, 0);
+    this.setWeight(runAction, 0);
+    this.setWeight(tAction, 0);
 
-      mixer = new THREE.AnimationMixer(player);
-
-      idleAction = mixer.clipAction(animations[0]);
-      walkAction = mixer.clipAction(animations[3]);
-      runAction = mixer.clipAction(animations[1]);
-      tAction = mixer.clipAction(animations[2]);
-
-      actions = [idleAction, walkAction, runAction, tAction];
-      activateAllActions();
-      currentAction = idleAction;
-      loading = false;
+    actions.forEach(function (action) {
+      action.play();
     });
-    const activateAllActions = () => {
-      this.setWeight(idleAction, 1);
-      this.setWeight(walkAction, 0);
-      this.setWeight(runAction, 0);
-      this.setWeight(tAction, 0);
-
-      actions.forEach(function (action) {
-        action.play();
-      });
-    };
   }
 
   pauseAllActions() {
@@ -169,14 +80,14 @@ class playerLoader {
     mixer.update(mixerUpdateDelta);
   }
 
-  //# sourceURL=undefined
+  // # sourceURL=undefined
 }
 
 //////////////////////////////////////////////////////
 let MoveDir = new THREE.Vector3();
 const scene = new THREE.Scene();
 scene.background = 0xffffff;
-scene.fog = new THREE.Fog(0x82e2e5, 0.1, 20);
+// scene.fog = new THREE.Fog(0x82e2e5, 0.1, 20);
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
@@ -208,7 +119,7 @@ b3.repeat.set(50, 50);
 
 const environmentLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.3);
 scene.add(environmentLight);
-
+const light = new THREE.AmbientLight(0x404040);
 const dirLight = new THREE.DirectionalLight(0xffffff);
 dirLight.position.set(3, 3, 3);
 dirLight.castShadow = true;
@@ -222,7 +133,7 @@ let lh = new THREE.DirectionalLightHelper(dirLight);
 scene.add(dirLight, lh, dirLight.target);
 const pivot = new THREE.AxesHelper(20);
 const grid = new THREE.GridHelper(10);
-scene.add(pivot, grid);
+scene.add(pivot, grid, light);
 
 const geometry1 = new THREE.PlaneBufferGeometry(100, 100);
 const geometry2 = new THREE.BoxBufferGeometry(0.6, 1.6, 0.6);
@@ -239,8 +150,27 @@ const material2 = new THREE.MeshStandardMaterial({
 const terrain = new THREE.Mesh(geometry1, material1);
 const PlayerHitbox = new THREE.Mesh(geometry2, material2);
 scene.add(terrain, PlayerHitbox);
-const PlayerLoad = new playerLoader();
-const oloader = new objectLoader();
+const gltfLoader = new load.gltfLoader();
+const PlayerLoad = new playerAnimator();
+const oloader = new load.objectLoader();
+// gltfLoader.gltfLoad("assets/models/city.glb", (a, b) => {
+//   const city = a;
+//   scene.add(city);
+// });
+gltfLoader.gltfLoad("assets/models/Soldier.glb", (x, y) => {
+  player = x;
+  gltf = y;
+  scene.add(player);
+  console.log(gltf);
+  PlayerLoad.Animate();
+  oloader.loadobj("assets/models/", "city", "city", (object) => {
+    scene.add(object);
+    console.log(object);
+    object.scale.set(new THREE.Vector3(0.5, 0.5, 0.5));
+    // object.position.set(new THREE.Vector3(0, 10, 0));
+    object.castShadow = true;
+  });
+});
 oloader.loadobj(
   "assets/hills/modular_platformer_models/",
   "Prop_Crate",
