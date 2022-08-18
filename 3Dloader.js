@@ -3,7 +3,8 @@ import { GLTFLoader } from "./GLTFLoader.js";
 import { MTLLoader } from "./MTLLoader.js";
 import { threeToCannon, ShapeType } from "./three-to-cannon.modern.js";
 import * as cannon from "./cannon-es.js";
-class objectLoader {
+
+class load3D {
   constructor() {}
   loadobj(path, obj, mtl, callback) {
     new MTLLoader().setPath(path).load(mtl + ".mtl", function (materials) {
@@ -15,6 +16,18 @@ class objectLoader {
         .load(obj + ".obj", function (object) {
           callback(object);
         });
+    });
+  }
+  gltfLoad(objectPath, callback) {
+    const gloader = new GLTFLoader();
+    gloader.load(objectPath, function (gltf) {
+      let variableForModel = gltf.scene;
+      variableForModel.castShadow = true;
+
+      variableForModel.traverse(function (object) {
+        if (object.isMesh) object.castShadow = true;
+      });
+      callback(variableForModel, gltf);
     });
   }
   boundLoad(object, p, callback) {
@@ -30,20 +43,4 @@ class objectLoader {
     callback(body);
   }
 }
-class gltfLoader {
-  constructor() {}
-
-  gltfLoad(objectPath, callback) {
-    const gloader = new GLTFLoader();
-    gloader.load(objectPath, function (gltf) {
-      let variableForModel = gltf.scene;
-      variableForModel.castShadow = true;
-
-      variableForModel.traverse(function (object) {
-        if (object.isMesh) object.castShadow = true;
-      });
-      callback(variableForModel, gltf);
-    });
-  }
-}
-export { objectLoader, gltfLoader };
+export { load3D };

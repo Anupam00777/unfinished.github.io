@@ -1,5 +1,5 @@
 import * as cannon from "./cannon-es.js";
-import * as load from "./3Dloader.js";
+import { load3D } from "./3Dloader.js";
 //////////////////////////////////////////////////////
 let loading = true;
 let player;
@@ -30,7 +30,6 @@ class playerAnimator {
     actions = [idleAction, walkAction, runAction, tAction];
     this.activateAllActions();
     currentAction = idleAction;
-    loading = false;
   }
   activateAllActions() {
     this.setWeight(idleAction, 1);
@@ -190,10 +189,13 @@ const rayCaster = new THREE.Raycaster();
 const Pointer = new THREE.Vector2();
 
 //////////////////////////////////////////////////////
-const gltfLoader = new load.gltfLoader();
+const Loader = new load3D();
 const PlayerLoad = new playerAnimator();
-const oloader = new load.objectLoader();
-gltfLoader.gltfLoad("assets/models/Soldier.glb", (x, y) => {
+Loader.gltfLoad("assets/models/grass.glb", (a, b) => {
+  scene.add(a);
+  a.position.set(2, 0, 5);
+});
+Loader.gltfLoad("assets/models/Soldier.glb", (x, y) => {
   player = x;
   gltf = y;
   scene.add(player);
