@@ -189,17 +189,19 @@ const rayCaster = new THREE.Raycaster();
 const Pointer = new THREE.Vector2();
 
 //////////////////////////////////////////////////////
+let geo;
 const Loader = new load3D();
 const PlayerLoad = new playerAnimator();
 Loader.gltfLoad("assets/models/grass.glb", (a, b) => {
   scene.add(a);
-  a.position.set(2, 0, 5);
+  console.log("lol");
 });
 Loader.gltfLoad("assets/models/Soldier.glb", (x, y) => {
   player = x;
   gltf = y;
   scene.add(player);
   PlayerLoad.Animate();
+  loading = false;
 });
 PlayerHitbox.visible = false;
 //////////////////////////////////////////////////////
