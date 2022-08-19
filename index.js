@@ -657,5 +657,5 @@ document
   });
 orWarn();
 window.onload = () => {
-  document.getElementById("version").innerText = "1.15";
+  document.getElementById("version").innerText = "1.17";
 };
