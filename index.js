@@ -663,5 +663,5 @@ document
   });
 orWarn();
 window.onload = () => {
-  document.getElementById("version").innerText = "1.19";
+  document.getElementById("version").innerText = "1.20";
 };
