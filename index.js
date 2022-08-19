@@ -190,6 +190,7 @@ const rayCaster = new THREE.Raycaster();
 const Pointer = new THREE.Vector2();
 
 //////////////////////////////////////////////////////
+let grass;
 const Loader = new load3D();
 const PlayerLoad = new playerAnimator();
 Loader.gltfLoad("assets/models/grass.glb", (a, b) => {
@@ -625,7 +626,7 @@ function animate() {
   PlayerHitbox.position.copy(playerBody.position);
   PlayerHitbox.quaternion.copy(playerBody.quaternion);
   renderer.render(scene, camera);
-  cannonDebugger.update();
+  // cannonDebugger.update();
   requestAnimationFrame(animate);
 }
 //////////////////////////////////////////////////////
