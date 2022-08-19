@@ -495,7 +495,8 @@ leftpanhammer.on("panend", function () {
 });
 let PlayerVector = new THREE.Vector3();
 leftpanhammer.on("panmove", function (event) {
-  touchMove(event.angle, speedFactor);
+  touchMove(speedFactor);
+  playerDir = (event.angle + 90) / -60;
 });
 //////////////////////////////////////////////////////
 const p = document.getElementById("p");
@@ -523,11 +524,10 @@ const hitboxToggle = () => {
     ? (PlayerHitbox.visible = true)
     : (PlayerHitbox.visible = false);
 };
-function touchMove(angle, speedFactor) {
+function touchMove(speedFactor) {
   if (touched) {
     if (Perspective === "tp") {
       player.getWorldDirection(PlayerVector);
-      playerDir = (angle + 90) / -60;
       playerBody.velocity.set(
         -PlayerVector.x * 2 * speedFactor,
         playerBody.velocity.y,
@@ -597,7 +597,7 @@ function animate() {
     player.visible = false;
   }
   playerMovement();
-  touchMove(0, 0);
+  touchMove(0);
   PlayerLoad.Playeranimate();
 
   playerBody.quaternion.x = 0;
@@ -657,5 +657,5 @@ document
   });
 orWarn();
 window.onload = () => {
-  document.getElementById("version").innerText = "1.17";
+  document.getElementById("version").innerText = "1.18";
 };
