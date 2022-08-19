@@ -1,5 +1,6 @@
 import * as cannon from "./cannon-es.js";
 import { load3D } from "./3Dloader.js";
+import CannonDebugger from "./cannon-es-debugger.js";
 //////////////////////////////////////////////////////
 let loading = true;
 let player;
@@ -157,7 +158,7 @@ scene.add(terrain, PlayerHitbox);
 const world = new cannon.World({
   gravity: new cannon.Vec3(0, -10, 0),
 });
-
+// const cannonDebugger = new CannonDebugger(scene, world);
 const cm1 = new cannon.Material();
 const cm2 = new cannon.Material();
 const c12 = new cannon.ContactMaterial(cm1, cm2, {
@@ -192,8 +193,8 @@ const Pointer = new THREE.Vector2();
 const Loader = new load3D();
 const PlayerLoad = new playerAnimator();
 Loader.gltfLoad("assets/models/grass.glb", (a, b) => {
-  a.position.set(0, 1, 0);
   scene.add(a);
+  a.position.set(0, 1, 0);
   console.log("lol");
 });
 Loader.gltfLoad("assets/models/Soldier.glb", (x, y) => {
@@ -222,42 +223,43 @@ let move = [
 ];
 let now = new THREE.Clock();
 let playerDir = 0;
-let speedFactor = 1;
+let kspeedFactor = 1;
+let speedFactor = 0;
 function playerMovement() {
   if (move[0]) {
     PlayerActions(1);
     playerDir = 0;
     playerBody.velocity.set(
-      MoveDir.x * 2 * speedFactor,
+      MoveDir.x * 2 * kspeedFactor,
       playerBody.velocity.y,
-      MoveDir.z * 2 * speedFactor
+      MoveDir.z * 2 * kspeedFactor
     );
   }
   if (move[1]) {
     PlayerActions(1);
     playerDir = 3;
     playerBody.velocity.set(
-      -MoveDir.x * 2 * speedFactor,
+      -MoveDir.x * 2 * kspeedFactor,
       playerBody.velocity.y,
-      -MoveDir.z * 2 * speedFactor
+      -MoveDir.z * 2 * kspeedFactor
     );
   }
   if (move[2]) {
     PlayerActions(1);
     playerDir = 1.5;
     playerBody.velocity.set(
-      MoveDir.z * 2 * speedFactor,
+      MoveDir.z * 2 * kspeedFactor,
       playerBody.velocity.y,
-      -MoveDir.x * 2 * speedFactor
+      -MoveDir.x * 2 * kspeedFactor
     );
   }
   if (move[3]) {
     PlayerActions(1);
     playerDir = -1.5;
     playerBody.velocity.set(
-      -MoveDir.z * 2 * speedFactor,
+      -MoveDir.z * 2 * kspeedFactor,
       playerBody.velocity.y,
-      MoveDir.x * 2 * speedFactor
+      MoveDir.x * 2 * kspeedFactor
     );
   }
   if (move[4]) {
@@ -332,7 +334,7 @@ window.addEventListener("keydown", function (event) {
       move[4] = true;
       break;
     case "shift":
-      speedFactor = 4;
+      kspeedFactor = 4;
       running = true;
       move[5] = true;
       break;
@@ -382,7 +384,7 @@ window.addEventListener("keyup", function (event) {
       break;
     case "shift":
       running = false;
-      speedFactor = 1;
+      kspeedFactor = 1;
       move[5] = false;
       break;
     case "control":
@@ -484,18 +486,20 @@ let touched = false;
 rightpanhammer.on("doubletap", function () {
   jump();
 });
+let speedSync = 0;
 leftpanhammer.on("panstart ", function () {
   touched = true;
+  speedFactor = 1 + speedSync;
   PlayerActions(1);
 });
 leftpanhammer.on("panend", function () {
   PlayerActions(0);
   touched = false;
+  speedFactor = 0;
   playerBody.velocity.setZero();
 });
 let PlayerVector = new THREE.Vector3();
 leftpanhammer.on("panmove", function (event) {
-  touchMove(speedFactor);
   playerDir = (event.angle + 90) / -60;
 });
 //////////////////////////////////////////////////////
@@ -510,8 +514,8 @@ h.addEventListener("click", function () {
 });
 sprint.addEventListener("click", function () {
   running === false
-    ? ((running = true), (speedFactor = 4))
-    : ((running = false), (speedFactor = 1));
+    ? ((running = true), (speedSync = 3))
+    : ((running = false), (speedSync = 0));
   let x = sprint.style.background;
 
   x === "" ? (sprint.style.background = "red") : (sprint.style.background = "");
@@ -597,7 +601,7 @@ function animate() {
     player.visible = false;
   }
   playerMovement();
-  touchMove(0);
+  touchMove(speedFactor);
   PlayerLoad.Playeranimate();
 
   playerBody.quaternion.x = 0;
@@ -621,6 +625,7 @@ function animate() {
   PlayerHitbox.position.copy(playerBody.position);
   PlayerHitbox.quaternion.copy(playerBody.quaternion);
   renderer.render(scene, camera);
+  cannonDebugger.update();
   requestAnimationFrame(animate);
 }
 //////////////////////////////////////////////////////
