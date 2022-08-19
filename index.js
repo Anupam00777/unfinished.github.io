@@ -86,7 +86,7 @@ class playerAnimator {
 let MoveDir = new THREE.Vector3();
 const scene = new THREE.Scene();
 scene.background = 0xffffff;
-// scene.fog = new THREE.Fog(0x82e2e5, 0.1, 20);
+scene.fog = new THREE.Fog(0x82e2e5, 0.1, 20);
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
@@ -189,10 +189,10 @@ const rayCaster = new THREE.Raycaster();
 const Pointer = new THREE.Vector2();
 
 //////////////////////////////////////////////////////
-let geo;
 const Loader = new load3D();
 const PlayerLoad = new playerAnimator();
 Loader.gltfLoad("assets/models/grass.glb", (a, b) => {
+  a.position.set(0, 1, 0);
   scene.add(a);
   console.log("lol");
 });
@@ -407,7 +407,7 @@ window.addEventListener("keyup", function (event) {
   playerBody.velocity.setZero();
 });
 document.addEventListener("click", function () {
-  // document.documentElement.requestFullscreen();
+  document.documentElement.requestFullscreen();
   if (play == true) {
     document.body.requestPointerLock();
   }
@@ -480,33 +480,22 @@ rightpanhammer.on("pan", function (event) {
     }
   }
 });
+let touched = false;
 rightpanhammer.on("doubletap", function () {
   jump();
 });
 leftpanhammer.on("panstart ", function () {
+  touched = true;
   PlayerActions(1);
 });
 leftpanhammer.on("panend", function () {
   PlayerActions(0);
+  touched = false;
   playerBody.velocity.setZero();
 });
 let PlayerVector = new THREE.Vector3();
 leftpanhammer.on("panmove", function (event) {
-  if (Perspective === "tp") {
-    player.getWorldDirection(PlayerVector);
-    playerDir = (event.angle + 90) / -60;
-    playerBody.velocity.set(
-      -PlayerVector.x * 2 * speedFactor,
-      playerBody.velocity.y,
-      -PlayerVector.z * 2 * speedFactor
-    );
-  } else if (Perspective === "fp") {
-    playerBody.velocity.set(
-      MoveDir.x * 2 * speedFactor,
-      playerBody.velocity.y,
-      MoveDir.z * 2 * speedFactor
-    );
-  }
+  touchMove(event.angle, speedFactor);
 });
 //////////////////////////////////////////////////////
 const p = document.getElementById("p");
@@ -534,7 +523,25 @@ const hitboxToggle = () => {
     ? (PlayerHitbox.visible = true)
     : (PlayerHitbox.visible = false);
 };
-
+function touchMove(angle, speedFactor) {
+  if (touched) {
+    if (Perspective === "tp") {
+      player.getWorldDirection(PlayerVector);
+      playerDir = (angle + 90) / -60;
+      playerBody.velocity.set(
+        -PlayerVector.x * 2 * speedFactor,
+        playerBody.velocity.y,
+        -PlayerVector.z * 2 * speedFactor
+      );
+    } else if (Perspective === "fp") {
+      playerBody.velocity.set(
+        MoveDir.x * 2 * speedFactor,
+        playerBody.velocity.y,
+        MoveDir.z * 2 * speedFactor
+      );
+    }
+  }
+}
 function jump() {
   if (160 <= Math.round(playerBody.velocity.y * Math.pow(10, 17)) <= 200) {
     weigh = 1;
@@ -590,6 +597,7 @@ function animate() {
     player.visible = false;
   }
   playerMovement();
+  touchMove(0, 0);
   PlayerLoad.Playeranimate();
 
   playerBody.quaternion.x = 0;
